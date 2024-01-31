@@ -26,7 +26,7 @@ chrome_options.add_argument("--headless")
 
 dotenv_path = Path('c:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
+llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-1106")
 
 #define a prompt template for the summarization task
 
@@ -36,16 +36,16 @@ def define_schema():
  schema = {
     "properties": {
         "mental_illness_title": {"type": "string"},
-        "mental_illness_journey": {"type": "string"},
+        "mental_illness_story": {"type": "string"},
         "coping mechanism": {"type": "string"}
     },
-    "required": ["mental_illness_title", "mental_illness_journey","mental_illness_summary","coping mechanism"],
+    "required": ["mental_illness_title", "mental_illness_story","coping mechanism"],
  }
  return schema
 
 
 def extract(content: str, schema: dict):
-    return create_extraction_chain(schema=schema, llm=llm).invoke("Group the content based on mental illness:"+content)
+    return create_extraction_chain(schema=schema, llm=llm).invoke("sort the content on what mental health issues they are facing, what is their story?? anf finally how they cope with it? :"+content)
 
 
 def batching_dataframes():
@@ -63,7 +63,7 @@ def process_url(url, schema):
     print("Extracting content with LLM for the URL: ", url)
 
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=1000, chunk_overlap=200
+        chunk_size=1000, chunk_overlap=350
     )
     splits = splitter.split_documents(docs_transformed)
 
@@ -98,10 +98,13 @@ def html_scrape(urls, schema):
                         df_list.append(result_df)
 
                 # Clear the futures list for the next batch
+                print("Clearing the futures list")
                 futures.clear()
 
-                # Wait for a minute before processing the next batch
-                time.sleep(60)
+                # Wait for a minute 20 before processing the next batch
+                print("Waiting for 70 seconds before processing the next batch of URLs...")
+                time.sleep(70)
+            time.sleep(5)
 
         # Wait for any remaining threads to finish
         for future in futures:
@@ -212,7 +215,7 @@ def button_sequence_flow(base_url):
    driver.quit()
 
 def batch_url_list(url_list):
-    return [url_list[i:i+5] for i in range(0,len(url_list),5)]
+    return [url_list[i:i+3] for i in range(0,len(url_list),3)]
    
 def main():
     base_url="https://www.blurtitout.org/blog/page/"
