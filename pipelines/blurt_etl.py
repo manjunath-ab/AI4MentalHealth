@@ -9,9 +9,7 @@ from langchain_community.document_loaders import AsyncChromiumLoader
 from langchain_community.document_transformers import BeautifulSoupTransformer
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain.chains import create_extraction_chain
-from langchain.prompts import (
-    PromptTemplate,
-)
+from langchain.prompts import PromptTemplate
 import pprint
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from selenium import webdriver
@@ -28,24 +26,25 @@ dotenv_path = Path('c:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-1106")
 
-#define a prompt template for the summarization task
 
-
-#pull article link from the list
 def define_schema():
  schema = {
     "properties": {
         "mental_illness_title": {"type": "string"},
         "mental_illness_story": {"type": "string"},
-        "coping mechanism": {"type": "string"}
+        "coping_mechanism": {"type": "string"},
+        "support_system": {"type": "string"},
+        "triggers": {"type": "string"},      
+        "self_care_practices:": {"type": "string"},
+        "reflections": {"type": "string"},
     },
-    "required": ["mental_illness_title", "mental_illness_story","coping mechanism"],
+    "required": ["mental_illness_title","mental_illness_story","coping_mechanism","support_system","triggers","self_care_practices","reflections"],
  }
  return schema
 
 
 def extract(content: str, schema: dict):
-    return create_extraction_chain(schema=schema, llm=llm).invoke("sort the content on what mental health issues they are facing, what is their story?? anf finally how they cope with it? :"+content)
+    return create_extraction_chain(schema=schema, llm=llm).invoke("sort the content on what mental health issues they are facing, what is their story?? and finally how they cope with it? :"+content)
 
 
 def batching_dataframes():
