@@ -16,7 +16,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import pandas as pd
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -46,11 +47,14 @@ def extract(content: str, schema: dict):
     return create_extraction_chain(schema=schema, llm=llm).invoke("Give me the summarization of the story:"+content)
 
 
-
+def batching_dataframes():
+   pass
 
 def scrape_with_playwright(urls, schema):
-    #batch the urls into groups of 10
-    loader = AsyncChromiumLoader(urls[0:10])
+  df_list=[]
+  #batch the urls into groups of 10
+  for i in range(0, len(urls), 10):
+    loader = AsyncChromiumLoader(urls[0:i+10])
     docs = loader.load()
     bs_transformer = BeautifulSoupTransformer()
     docs_transformed = bs_transformer.transform_documents(
@@ -64,11 +68,25 @@ def scrape_with_playwright(urls, schema):
         chunk_size=1000, chunk_overlap=0
     )
     splits = splitter.split_documents(docs_transformed)
-    print(f'content being used is {splits[0]}')
+    #print(f'content being used is {splits[0]}')
     # Process the first split
+    """
+    Need to wrap the extract function in a try except block to handle the case where the content is empty
+    """
+    try:
+        extracted_content = extract(schema=schema, content=splits[0].page_content)
+        #pprint.pprint(extracted_content)
+    except:
+        print('content is empty')
+        continue
+
     extracted_content = extract(schema=schema, content=splits[0].page_content)
     pprint.pprint(extracted_content)
-    return extracted_content
+
+    #convert into a dataframe
+    df = pd.DataFrame(extracted_content)
+    df_list.append(df)
+  return df_list
 
 def initial_fetch(url_thread):
    driver = webdriver.Chrome(options=chrome_options)
@@ -80,23 +98,35 @@ def initial_fetch(url_thread):
    driver.quit()
    return href_list
 
+
+
 def threaded_url_list_pull(base_url, num_threads=5):
     print('starting the threaded url list pull')
     url_list = []
     i = 1
 
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
+        # Create a list to hold the futures
+        futures = []
+
         while True:
             url_thread = base_url + str(i)
-            # Submit the task to the thread pool
+            # Submit the task to the thread pool and store the future
             future = executor.submit(initial_fetch, url_thread)
-            if i>16:
+            futures.append(future)
+
+            if i > 16:
                 break
-            url_list.extend(future.result())
+
             i += 1
             print(i)
 
+        # Wait for all threads to complete before moving on
+        for completed_future in as_completed(futures):
+            url_list.extend(completed_future.result())
+
     return url_list
+
 
 def button_sequence_flow(base_url):
    url_list=[]
@@ -123,14 +153,15 @@ def button_sequence_flow(base_url):
         
    
 def main():
-    base_url="https://www.blurtitout.org/blog/page/1"
-    url_list=threaded_url_list_pull(base_url)
+    base_url="https://www.blurtitout.org/blog/page/"
+    url_list=set(threaded_url_list_pull(base_url))
     #put in a check to not repeat the same url for future runs
     print('completed the url list')
     print(url_list,len(url_list))
     schema = define_schema()
-    tuned_json = scrape_with_playwright(url_list, schema=schema)
-    print(tuned_json)
+    df_list = scrape_with_playwright(url_list, schema=schema)
+    result=pd.concat(df_list,reset_index=True)
+    print(result)
 
 if __name__=='__main__':
  main()
