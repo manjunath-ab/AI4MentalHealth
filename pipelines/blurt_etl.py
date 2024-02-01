@@ -24,7 +24,25 @@ chrome_options.add_argument("--headless")
 
 dotenv_path = Path('c:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-1106")
+gpt_models = [
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-0125',
+    'gpt-3.5-turbo-0301',
+    'gpt-3.5-turbo-0613',
+    'gpt-3.5-turbo-1106',
+    'gpt-3.5-turbo-16k',
+    'gpt-3.5-turbo-16k-0613',
+    'gpt-3.5-turbo-instruct',
+    'gpt-3.5-turbo-instruct-0914'
+]
+
+import random
+
+def select_random_model(models_list):
+
+    return random.choice(models_list)
+
+llm = ChatOpenAI(temperature=0, model=select_random_model(gpt_models))
 
 
 def define_schema():
@@ -86,7 +104,7 @@ def process_url(url, schema):
     "reflections": str
     }
 
-    df=pd.DataFrame(extracted_content['text'])
+    df=pd.DataFrame([extracted_content['text']])
     # Check if all expected columns are present in the DataFrame
     missing_columns = set(schema_dict.keys()) - set(df.columns)
     # Add missing columns with NaN values
@@ -102,7 +120,8 @@ def html_scrape(urls, schema):
     with ThreadPoolExecutor(max_workers=3) as executor:
         futures = []
 
-        for url in urls:
+        for i,url in enumerate(urls):
+            print(f"Processing URL set {i+1} of {len(urls)}")
             # Submit each URL for processing in the thread pool
             future = executor.submit(process_url, url, schema)
             futures.append(future)
@@ -232,8 +251,9 @@ def button_sequence_flow(base_url):
    driver.quit()
 
 def batch_url_list(url_list):
-    return [url_list[i:i+3] for i in range(0,len(url_list),3)]
-   
+    batch_size = random.randint(3, 20)
+    return [url_list[i:i+batch_size] for i in range(0, len(url_list), batch_size)]
+
 def main():
     base_url="https://www.blurtitout.org/blog/page/"
     url_list=list(set(threaded_url_list_pull(base_url)))
@@ -242,9 +262,12 @@ def main():
     print(url_list,len(url_list))
     schema = define_schema()
     url_list=batch_url_list(url_list)
+    start_time = time.time()
     df_list = html_scrape(url_list, schema=schema)
+    end_time = time.time()
+    print("Time taken to process all URLs: ", end_time - start_time)
     result=pd.concat(df_list, ignore_index=True)
-    result.to_csv('blurt_illness.csv')
+    result.to_csv('blurt_illness1.csv')
 
 if __name__=='__main__':
  main()
