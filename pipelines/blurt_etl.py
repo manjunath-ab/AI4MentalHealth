@@ -18,28 +18,17 @@ from selenium.webdriver.chrome.options import Options
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
 import time
+import random
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 
 dotenv_path = Path('c:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
-gpt_models = [
-    'gpt-3.5-turbo',
-    'gpt-3.5-turbo-0125',
-    'gpt-3.5-turbo-0301',
-    'gpt-3.5-turbo-0613',
-    'gpt-3.5-turbo-1106',
-    'gpt-3.5-turbo-16k',
-    'gpt-3.5-turbo-16k-0613'
-]
 
-import random
 
-def select_random_model(models_list):
 
-    return random.choice(models_list)
-
+# Create an instance of the ChatOpenAI class
 llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo-0125')
 
 
@@ -101,8 +90,10 @@ def process_url(url, schema):
     "self_care_practices": str,
     "reflections": str
     }
-
-    df=pd.DataFrame([extracted_content['text']])
+    if extracted_content['text'] is list:
+        df=pd.DataFrame(extracted_content['text'][0])
+    else:
+        df=pd.DataFrame(extracted_content['text'])
     # Check if all expected columns are present in the DataFrame
     missing_columns = set(schema_dict.keys()) - set(df.columns)
     # Add missing columns with NaN values
@@ -265,7 +256,8 @@ def main():
     end_time = time.time()
     print("Time taken to process all URLs: ", end_time - start_time)
     result=pd.concat(df_list, ignore_index=True)
-    result.to_csv('blurt_illness1.csv')
+    result.dropna(how='all',inplace=True)
+    result.to_csv('blurt_illness2.csv',index=False)
 
 if __name__=='__main__':
  main()
