@@ -90,6 +90,8 @@ def process_url(url, schema):
     "self_care_practices": str,
     "reflections": str
     }
+
+    
     if extracted_content['text'] is list:
         df=pd.DataFrame(extracted_content['text'][0])
     else:
