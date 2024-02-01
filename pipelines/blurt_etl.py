@@ -31,9 +31,7 @@ gpt_models = [
     'gpt-3.5-turbo-0613',
     'gpt-3.5-turbo-1106',
     'gpt-3.5-turbo-16k',
-    'gpt-3.5-turbo-16k-0613',
-    'gpt-3.5-turbo-instruct',
-    'gpt-3.5-turbo-instruct-0914'
+    'gpt-3.5-turbo-16k-0613'
 ]
 
 import random
@@ -42,7 +40,7 @@ def select_random_model(models_list):
 
     return random.choice(models_list)
 
-llm = ChatOpenAI(temperature=0, model=select_random_model(gpt_models))
+llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo-0125')
 
 
 def define_schema():
