@@ -74,8 +74,26 @@ def process_url(url, schema):
 
     #extracted_content['text']['article'] = url
     pprint.pprint(extracted_content)
+
+    # Define the expected schema with column names and their corresponding data types
+    schema_dict = {
+    "mental_illness_title": str,
+    "mental_illness_story": str,
+    "coping_mechanism": str,
+    "support_system": str,
+    "triggers": str,
+    "self_care_practices": str,
+    "reflections": str
+    }
+
+    df=pd.DataFrame(extracted_content['text'])
+    # Check if all expected columns are present in the DataFrame
+    missing_columns = set(schema_dict.keys()) - set(df.columns)
+    # Add missing columns with NaN values
+    for column in missing_columns:
+      df[column] = None
     
-    return pd.DataFrame(extracted_content['text'])
+    return df
 
 
 def html_scrape(urls, schema):
