@@ -19,17 +19,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
 import time
 import random
+import os
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 
-dotenv_path = Path('c:/Users/abhis/.env')
-load_dotenv(dotenv_path=dotenv_path)
+# dotenv_path = Path('c:/Users/abhis/.env')
+# load_dotenv(dotenv_path=dotenv_path)
 
+openai_api_key = os.getenv("OPENAI_API_KEY")
+llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=1, model="gpt-3.5-turbo-0613")
 
 
 # Create an instance of the ChatOpenAI class
-llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo-0125')
+llm = ChatOpenAI(temperature=1, model='gpt-3.5-turbo-0125')
 
 
 def define_schema():
@@ -48,9 +51,41 @@ def define_schema():
  return schema
 
 
-def extract(content: str, schema: dict):
-    return create_extraction_chain(schema=schema, llm=llm).invoke("sort the content on what mental health issues they are facing, what is their story?? and finally how they cope with it? :"+content)
+# # Define the prompt templates
+# prompt_template_mental_illness_title = "Imagine you're a compassionate mental health therapist. Explore the unique aspects of the mental health condition titled '{mental_illness_title}'. Provide insights into its symptoms, prevalence, and any distinctive features. Share details as if you're helping someone understand this condition for the first time."
 
+# prompt_template_mental_illness_story = "Put yourself in the shoes of a supportive friend. Listen to the personal story of someone dealing with '{mental_illness_title}'. Capture the emotions, challenges faced, and moments of resilience. Provide a narrative that reflects empathy and understanding towards their mental health journey."
+
+# prompt_template_coping_mechanism = "As a caring mental health advocate, delve into the coping mechanism '{coping_mechanism}' adopted by individuals facing '{mental_illness_title}'. Explore its origins, effectiveness, and any rituals associated with it. Consider discussing how this coping mechanism provides a sense of comfort and stability in their lives."
+
+# prompt_template_support_system = "Imagine acting as a supportive figure in someone's life. Explore the robust support system surrounding individuals dealing with '{mental_illness_title}'. Identify key individuals, organizations, or resources contributing to their well-being. Highlight the roles these support networks play in fostering mental health resilience."
+
+# prompt_template_triggers = "Envision yourself as a perceptive mental health researcher. Investigate the triggers associated with '{mental_illness_title}'. Uncover environmental, emotional, or situational factors that exacerbate the condition. Consider discussing strategies employed to manage or mitigate these triggers in their day-to-day experiences."
+
+# prompt_template_self_care_practices = "Take on the role of a caring wellness advisor. Explore the self-care practices employed by individuals dealing with '{mental_illness_title}'. Dive into the routines, rituals, and habits that contribute to their mental well-being. Discuss the evolution of these practices and their impact on overall mental health."
+
+# prompt_template_reflections = "Imagine yourself as a reflective companion. Explore the personal reflections of individuals dealing with '{mental_illness_title}'. Delve into their thoughts on the journey, progress, and lessons learned. Capture the nuanced aspects of their mental health narrative, considering both challenges and moments of growth."
+
+# prompt_templates_combined = PromptTemplate(
+#     input_variables=['mental_illness_title', 'coping_mechanism', 'support_system', 'triggers', 'self_care_practices', 'reflections'],
+#     template="Imagine you are both a compassionate mental health therapist and a supportive friend. Explore the unique aspects of the mental health condition titled '{mental_illness_title}'. Delve into the coping mechanism '{coping_mechanism}' adopted by individuals facing this condition. Identify the robust support system surrounding them, considering key individuals, organizations, or resources. Investigate the triggers associated with '{mental_illness_title}', uncovering environmental, emotional, or situational factors. Delve into the self-care practices employed, exploring the routines, rituals, and habits contributing to mental well-being. Finally, reflect on the personal journey, progress, and lessons learned, capturing nuanced aspects of their mental health narrative."
+# )
+
+
+def extract(content: str, schema: dict):
+    prompt = (
+        f"Explore and provide detailed insights into all of the following aspects related to mental health. As you provide this information, imagine you are both a compassionate mental health therapist and a empathetic, supportive friend.\n"
+        f"1. **Mental Illness Title:** Describe the specific mental health condition or challenge.\n"
+        f"2. **Mental Illness Story:** Narrate a detailed and emotive story of someone navigating this mental health condition. Include their emotions, challenges, and moments of resilience.\n"
+        f"3. **Coping Mechanism:** Explain the strategies and methods adopted by the individual to cope with their mental health challenges.\n"
+        f"4. **Support System:** Identify and elaborate on the crucial individuals, organizations, or resources that contribute to the individual's well-being.\n"
+        f"5. **Triggers:** Delve into a nuanced exploration of environmental, emotional, or situational triggers that significantly impact or exacerbate the mental health condition.\n"
+        f"6. **Self-Care Practices:** Provide a detailed examination of the daily routines, rituals, and habits that actively contribute to the individual's mental well-being.\n"
+        f"7. **Reflections:** acknowledging progress made and lessons learned, offering a holistic perspective on the individual's mental health experiences.\n"
+        f"If specific data is not available for any of the fields, please add content more closely associated with the mental illness, creating a comprehensive and insightful narrative.\n"
+        f"As you navigate this exploration, envision yourself peeling back layers to reveal a profound understanding of the diverse triggers impacting the individual's mental health."
+    )
+    return create_extraction_chain(schema=schema, llm=llm).invoke(prompt+content)
 
 def batching_dataframes():
    pass
