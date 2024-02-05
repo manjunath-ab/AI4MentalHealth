@@ -1,5 +1,2 @@
-import pandas as pd
+from python_to_snowflake import create_snowflake_conn, upload_to_stage, stage_to_table
 
-result=pd.read_csv('blurt_illness2.csv')
-result.dropna(how='all',inplace=True)
-result.to_csv('blurt_illness2_5.csv',index=False,sep='$')
