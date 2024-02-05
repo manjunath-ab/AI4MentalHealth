@@ -20,20 +20,20 @@ import pandas as pd
 import time
 import random
 import os
+from langchain_community.chat_models import ChatOllama
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 
-# dotenv_path = Path('c:/Users/abhis/.env')
-# load_dotenv(dotenv_path=dotenv_path)
+dotenv_path = Path('c:/Users/abhis/.env')
+load_dotenv(dotenv_path=dotenv_path)
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
-llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=1, model="gpt-3.5-turbo-0613")
+#openai_api_key = os.getenv("OPENAI_API_KEY")
+#llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=1, model="gpt-3.5-turbo-0125")
 
 
 # Create an instance of the ChatOpenAI class
 llm = ChatOpenAI(temperature=1, model='gpt-3.5-turbo-0125')
-
 
 def define_schema():
  schema = {
@@ -143,7 +143,7 @@ def process_url(url, schema):
 def html_scrape(urls, schema):
     df_list = []
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=1000) as executor:
         futures = []
 
         for i,url in enumerate(urls):
@@ -152,11 +152,12 @@ def html_scrape(urls, schema):
             future = executor.submit(process_url, url, schema)
             futures.append(future)
 
-            # If we've processed a batch of 3 URL sets, wait for a minute
-            if len(futures) == 3:
+            # If we've processed a batch of 1000 URLs, wait for a minute
+            if len(futures) == 1000:
                 for completed_future in futures:
                     result_df = completed_future.result()
                     if result_df is not None:
+                        result_df['url_link']=url
                         df_list.append(result_df)
 
                 # Clear the futures list for the next batch
@@ -166,7 +167,7 @@ def html_scrape(urls, schema):
                 # Wait for a minute 20 before processing the next batch
                 print("Waiting for 70 seconds before processing the next batch of URLs...")
                 time.sleep(70)
-            time.sleep(5)
+            time.sleep(2)
 
         # Wait for any remaining threads to finish
         for future in futures:
@@ -275,10 +276,11 @@ def button_sequence_flow(base_url):
 
 # Close the webdriver
    driver.quit()
-
+"""
 def batch_url_list(url_list):
     batch_size = random.randint(3, 20)
     return [url_list[i:i+batch_size] for i in range(0, len(url_list), batch_size)]
+"""
 
 def main():
     base_url="https://www.blurtitout.org/blog/page/"
@@ -287,7 +289,7 @@ def main():
     print('completed the url list')
     print(url_list,len(url_list))
     schema = define_schema()
-    url_list=batch_url_list(url_list)
+    #url_list=batch_url_list(url_list)
     start_time = time.time()
     df_list = html_scrape(url_list, schema=schema)
     end_time = time.time()
