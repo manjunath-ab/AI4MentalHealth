@@ -34,7 +34,7 @@ load_dotenv(dotenv_path=dotenv_path)
 
 
 # Create an instance of the ChatOpenAI class
-llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo-0125')
+llm = ChatOpenAI(temperature=random.random(), model='gpt-3.5-turbo-0125')
 
 def define_schema():
  schema = {
@@ -125,8 +125,7 @@ def process_url(url, schema):
     
     return df
 
-
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+#urls is a list of urls
 
 def html_scrape(urls, schema):
     df_list = []
