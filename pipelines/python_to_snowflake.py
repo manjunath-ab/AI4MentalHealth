@@ -38,7 +38,15 @@ def upload_to_stage(cursor,file_path,file_name):
 
 def stage_to_table(cursor):
     # Copy data from stage to table
-    cursor.execute("COPY INTO CHATBOT_KNOWLEDGE FROM @KNOWLEDGEBASE_STAGE FILE_FORMAT='PYTHON' ")
+    cursor.execute("COPY INTO CHATBOT_KNOWLEDGE FROM @KNOWLEDGEBASE_STAGE FILE_FORMAT='PYTHON' ON_ERROR=CONTINUE ")
     return
 
-
+"""
+def main():
+    conn = create_snowflake_conn()
+    cursor = conn.cursor()
+    upload_to_stage(cursor,Path(os.getenv('FILE_PATH')),f'knowledge-{unique_identifier}.csv')
+    stage_to_table(cursor)
+    cursor.close()
+    conn.close()
+  """

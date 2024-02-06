@@ -34,7 +34,7 @@ load_dotenv(dotenv_path=dotenv_path)
 
 
 # Create an instance of the ChatOpenAI class
-llm = ChatOpenAI(temperature=1, model='gpt-3.5-turbo-0125')
+llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo-0125')
 
 def define_schema():
  schema = {
@@ -126,10 +126,12 @@ def process_url(url, schema):
     return df
 
 
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+
 def html_scrape(urls, schema):
     df_list = []
 
-    with ThreadPoolExecutor(max_workers=1000) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         futures = []
 
         for i,url in enumerate(urls):
@@ -138,13 +140,25 @@ def html_scrape(urls, schema):
             future = executor.submit(process_url, url, schema)
             futures.append(future)
 
-        for completed_future in futures:
-            try:
-                result_df = completed_future.result()
-                if result_df is not None:
-                    df_list.append(result_df)
-            except Exception as e:
-                print(f"Error processing URL {url}: {e}")
+            # If we've processed a batch of 3 URL sets, wait for a minute
+            if len(futures) == 20:
+                for completed_future in futures:
+                    result_df = completed_future.result()
+                    if result_df is not None:
+                        df_list.append(result_df)
+
+                # Clear the futures list for the next batch
+                print("Clearing the futures list")
+                futures.clear()
+
+                
+            time.sleep(2)
+
+        # Wait for any remaining threads to finish
+        for future in futures:
+            result_df = future.result()
+            if result_df is not None:
+                df_list.append(result_df)
 
     return df_list
 
@@ -227,13 +241,14 @@ def main():
     """
     testing
     """
-    url_list=[url_list[0]]
+    #url_list=[url_list[0]]
     start_time = time.time()
     df_list = html_scrape(url_list, schema=schema)
     end_time = time.time()
     print("Time taken to process all URLs: ", end_time - start_time)
     result=pd.concat(df_list, ignore_index=True)
-    result.dropna(how='all',inplace=True)
+    #result.dropna(how='all',inplace=True)
+    result.dropna(subset=['mental_illness_title'], inplace=True)
     if not os.path.exists('staging_files'):
         os.makedirs('staging_files')
     unique_identifier = str(int(time.time()))
