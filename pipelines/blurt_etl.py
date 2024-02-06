@@ -20,20 +20,21 @@ import pandas as pd
 import time
 import random
 import os
+from python_to_snowflake import create_snowflake_conn, upload_to_stage, stage_to_table
+
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
+dotenv_path = Path('c:/Users/abhis/.env')
+load_dotenv(dotenv_path=dotenv_path)
 
-# dotenv_path = Path('c:/Users/abhis/.env')
-# load_dotenv(dotenv_path=dotenv_path)
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
-llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=1, model="gpt-3.5-turbo-0613")
+#openai_api_key = os.getenv("OPENAI_API_KEY")
+#llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=1, model="gpt-3.5-turbo-0125")
 
 
 # Create an instance of the ChatOpenAI class
-llm = ChatOpenAI(temperature=1, model='gpt-3.5-turbo-0125')
-
+llm = ChatOpenAI(temperature=0, model='gpt-3.5-turbo-0125')
 
 def define_schema():
  schema = {
@@ -50,26 +51,6 @@ def define_schema():
  }
  return schema
 
-
-# # Define the prompt templates
-# prompt_template_mental_illness_title = "Imagine you're a compassionate mental health therapist. Explore the unique aspects of the mental health condition titled '{mental_illness_title}'. Provide insights into its symptoms, prevalence, and any distinctive features. Share details as if you're helping someone understand this condition for the first time."
-
-# prompt_template_mental_illness_story = "Put yourself in the shoes of a supportive friend. Listen to the personal story of someone dealing with '{mental_illness_title}'. Capture the emotions, challenges faced, and moments of resilience. Provide a narrative that reflects empathy and understanding towards their mental health journey."
-
-# prompt_template_coping_mechanism = "As a caring mental health advocate, delve into the coping mechanism '{coping_mechanism}' adopted by individuals facing '{mental_illness_title}'. Explore its origins, effectiveness, and any rituals associated with it. Consider discussing how this coping mechanism provides a sense of comfort and stability in their lives."
-
-# prompt_template_support_system = "Imagine acting as a supportive figure in someone's life. Explore the robust support system surrounding individuals dealing with '{mental_illness_title}'. Identify key individuals, organizations, or resources contributing to their well-being. Highlight the roles these support networks play in fostering mental health resilience."
-
-# prompt_template_triggers = "Envision yourself as a perceptive mental health researcher. Investigate the triggers associated with '{mental_illness_title}'. Uncover environmental, emotional, or situational factors that exacerbate the condition. Consider discussing strategies employed to manage or mitigate these triggers in their day-to-day experiences."
-
-# prompt_template_self_care_practices = "Take on the role of a caring wellness advisor. Explore the self-care practices employed by individuals dealing with '{mental_illness_title}'. Dive into the routines, rituals, and habits that contribute to their mental well-being. Discuss the evolution of these practices and their impact on overall mental health."
-
-# prompt_template_reflections = "Imagine yourself as a reflective companion. Explore the personal reflections of individuals dealing with '{mental_illness_title}'. Delve into their thoughts on the journey, progress, and lessons learned. Capture the nuanced aspects of their mental health narrative, considering both challenges and moments of growth."
-
-# prompt_templates_combined = PromptTemplate(
-#     input_variables=['mental_illness_title', 'coping_mechanism', 'support_system', 'triggers', 'self_care_practices', 'reflections'],
-#     template="Imagine you are both a compassionate mental health therapist and a supportive friend. Explore the unique aspects of the mental health condition titled '{mental_illness_title}'. Delve into the coping mechanism '{coping_mechanism}' adopted by individuals facing this condition. Identify the robust support system surrounding them, considering key individuals, organizations, or resources. Investigate the triggers associated with '{mental_illness_title}', uncovering environmental, emotional, or situational factors. Delve into the self-care practices employed, exploring the routines, rituals, and habits contributing to mental well-being. Finally, reflect on the personal journey, progress, and lessons learned, capturing nuanced aspects of their mental health narrative."
-# )
 
 
 def extract(content: str, schema: dict):
@@ -137,13 +118,20 @@ def process_url(url, schema):
     for column in missing_columns:
       df[column] = None
     
+    if df is not None and df.empty:
+        return None
+    else:
+        df['url_link'] = url
+    
     return df
 
+
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 
 def html_scrape(urls, schema):
     df_list = []
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         futures = []
 
         for i,url in enumerate(urls):
@@ -153,7 +141,7 @@ def html_scrape(urls, schema):
             futures.append(future)
 
             # If we've processed a batch of 3 URL sets, wait for a minute
-            if len(futures) == 3:
+            if len(futures) == 20:
                 for completed_future in futures:
                     result_df = completed_future.result()
                     if result_df is not None:
@@ -163,10 +151,8 @@ def html_scrape(urls, schema):
                 print("Clearing the futures list")
                 futures.clear()
 
-                # Wait for a minute 20 before processing the next batch
-                print("Waiting for 70 seconds before processing the next batch of URLs...")
-                time.sleep(70)
-            time.sleep(5)
+                
+            time.sleep(2)
 
         # Wait for any remaining threads to finish
         for future in futures:
@@ -176,43 +162,6 @@ def html_scrape(urls, schema):
 
     return df_list
 
-def scrape_with_playwright(urls, schema):
-  df_list=[]
-  #batch the urls into groups of 10
-  for i in range(0,20,10): #len(urls)
-    loader = AsyncChromiumLoader(urls[i:i+10])
-    docs = loader.load()
-    bs_transformer = BeautifulSoupTransformer()
-    docs_transformed = bs_transformer.transform_documents(
-        docs, tags_to_extract=["p"]
-    )
-    #print(docs_transformed)
-    print("Extracting content with LLM")
-
-    # Grab the first 1000 tokens of the site
-    splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=1000, chunk_overlap=0
-    )
-    splits = splitter.split_documents(docs_transformed)
-    #print(f'content being used is {splits[0]}')
-    # Process the first split
-    """
-    Need to wrap the extract function in a try except block to handle the case where the content is empty
-    """
-    try:
-        extracted_content = extract(schema=schema, content=splits[0].page_content)
-        #pprint.pprint(extracted_content)
-    except:
-        print('content is empty')
-        continue
-
-    extracted_content = extract(schema=schema, content=splits[0].page_content)
-    pprint.pprint(extracted_content)
-
-    #convert into a dataframe
-    df = pd.DataFrame(extracted_content)
-    df_list.append(df)
-  return df_list
 
 def initial_fetch(url_thread):
    driver = webdriver.Chrome(options=chrome_options)
@@ -275,10 +224,12 @@ def button_sequence_flow(base_url):
 
 # Close the webdriver
    driver.quit()
-
+"""
 def batch_url_list(url_list):
     batch_size = random.randint(3, 20)
     return [url_list[i:i+batch_size] for i in range(0, len(url_list), batch_size)]
+"""
+
 
 def main():
     base_url="https://www.blurtitout.org/blog/page/"
@@ -287,14 +238,27 @@ def main():
     print('completed the url list')
     print(url_list,len(url_list))
     schema = define_schema()
-    url_list=batch_url_list(url_list)
+    """
+    testing
+    """
+    #url_list=[url_list[0]]
     start_time = time.time()
     df_list = html_scrape(url_list, schema=schema)
     end_time = time.time()
     print("Time taken to process all URLs: ", end_time - start_time)
     result=pd.concat(df_list, ignore_index=True)
-    result.dropna(how='all',inplace=True)
-    result.to_csv('blurt_illness2.csv',index=False)
+    #result.dropna(how='all',inplace=True)
+    result.dropna(subset=['mental_illness_title'], inplace=True)
+    if not os.path.exists('staging_files'):
+        os.makedirs('staging_files')
+    unique_identifier = str(int(time.time()))
+    result.to_csv(os.path.join('staging_files', f'knowledge-{unique_identifier}.csv'), index=False, sep='$',header=True)
+    conn = create_snowflake_conn()
+    cursor = conn.cursor()
+    upload_to_stage(cursor,Path(os.getenv('FILE_PATH')),f'knowledge-{unique_identifier}.csv')
+    stage_to_table(cursor)
+    cursor.close()
+    conn.close()
 
 if __name__=='__main__':
  main()

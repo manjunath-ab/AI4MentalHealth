@@ -1,5 +1,9 @@
-import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
 
-result=pd.read_csv('blurt_illness2.csv')
-result.dropna(how='all',inplace=True)
-result.to_csv('blurt_illness2_5.csv',index=False,sep='$')
+def get_max_workers():
+    with ThreadPoolExecutor() as executor:
+        max_workers = executor._max_workers
+    return max_workers
+
+max_workers = get_max_workers()
+print(f"Maximum number of workers: {max_workers}")
