@@ -1,0 +1,11 @@
+dagster
+dagster-cloud
+pandas
+langchain-openai
+langchain-community
+langchain
+selenium
+
+[dev]
+dagster-webserver
+pytest
