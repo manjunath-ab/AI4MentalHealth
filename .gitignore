@@ -1,4 +1,3 @@
-*.csv
 # Ignore CSV files
 *.csv
 
