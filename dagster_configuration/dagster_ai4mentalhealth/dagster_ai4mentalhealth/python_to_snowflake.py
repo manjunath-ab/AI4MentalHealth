@@ -2,7 +2,7 @@ import snowflake.connector
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-from dagster import Definitions,asset,op,define_asset_job
+
 # Load environment variables from .env file
 dotenv_path = Path('c:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
@@ -16,10 +16,9 @@ snowflake_database = os.getenv('SNOWFLAKE_DATABASE')
 snowflake_schema = os.getenv('SNOWFLAKE_SCHEMA')
 snowflake_warehouse = os.getenv('SNOWFLAKE_WAREHOUSE')
 
-@asset
-def create_snowflake_conn(context,publish_to_snowflake):
+
+def create_snowflake_conn():
     # Snowflake connection
-    identifier=publish_to_snowflake
     conn = snowflake.connector.connect(
         user=snowflake_user,
         password=snowflake_password,
@@ -28,25 +27,17 @@ def create_snowflake_conn(context,publish_to_snowflake):
         database=snowflake_database,
         schema=snowflake_schema
     )
-    cursor=conn.cursor()
-    return conn,cursor,identifier
-@asset
-def upload_to_stage(context,create_snowflake_conn):
+    return conn
+
+def upload_to_stage(cursor,file_path,file_name):
     # Create a stage
-    conn,cursor,identifier=create_snowflake_conn
-    file_path=Path(os.getenv('FILE_PATH'))
-    file_name=f'knowledge-{identifier}.csv'
     cursor.execute("CREATE STAGE IF NOT EXISTS KNOWLEDGEBASE_STAGE ")
     cursor.execute(f"PUT file:///{file_path}/{file_name} @KNOWLEDGEBASE_STAGE")
-    return conn,cursor
+    return
 
-@asset
-def stage_to_table(context,upload_to_stage):
+def stage_to_table(cursor,stage_name,table_name):
     # Copy data from stage to table
-    conn,cursor=upload_to_stage
-    cursor.execute("COPY INTO CHATBOT_KNOWLEDGE FROM @KNOWLEDGEBASE_STAGE FILE_FORMAT='PYTHON' ON_ERROR=CONTINUE ")
-    cursor.close()
-    conn.close()
+    cursor.execute(f"COPY INTO {table_name} FROM @{stage_name} FILE_FORMAT='PYTHON' ON_ERROR=CONTINUE ")
     return
 
 
