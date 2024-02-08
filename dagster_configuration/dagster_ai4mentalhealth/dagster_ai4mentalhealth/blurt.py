@@ -18,13 +18,21 @@ import random
 import time
 import os
 from dagster import asset
+import snowflake.connector
+from dagster_ai4mentalhealth.python_to_snowflake import create_snowflake_conn,upload_to_stage,stage_to_table
 
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 dotenv_path = Path('c:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
-
+# Snowflake connection parameters
+snowflake_account = os.getenv('SNOWFLAKE_ACCOUNT')
+snowflake_user = os.getenv('SNOWFLAKE_USER')
+snowflake_password = os.getenv('SNOWFLAKE_PASSWORD')
+snowflake_database = os.getenv('SNOWFLAKE_DATABASE')
+snowflake_schema = os.getenv('SNOWFLAKE_SCHEMA')
+snowflake_warehouse = os.getenv('SNOWFLAKE_WAREHOUSE')
 
 llm = ChatOpenAI(temperature=random.random(), model='gpt-3.5-turbo-0125')
 
@@ -129,8 +137,9 @@ def process_url(url, schema):
 def html_scrape(extracted_url_list,define_schema):
     urls= extracted_url_list
     """test
-    """
     urls=[urls[0]]
+    """
+    
     schema=define_schema
     df_list = []
 
@@ -176,15 +185,18 @@ def create_df(context, html_scrape):
     result.to_csv(os.path.join('staging_files', f'knowledge-{unique_identifier}.csv'), index=False, sep='$',header=True)
     return unique_identifier
 
-"""
-cursor.close()
-conn.close()
-"""
 @asset
 def publish_to_snowflake(context, create_df):
     identifier=create_df
-  
-    return identifier
+    context.log.info(f"Published to Snowflake: {identifier}")
+    conn=create_snowflake_conn()
+    cursor=conn.cursor()
+    upload_to_stage(cursor,Path(os.getenv('FILE_PATH')),f'knowledge-{identifier}.csv')
+    stage_to_table(cursor,'KNOWLEDGEBASE_STAGE','CHATBOT_KNOWLEDGE')
+    cursor.close()
+    conn.close()
+    return
+
 
 @asset
 def threaded_url_list_pull():
