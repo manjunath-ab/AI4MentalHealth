@@ -137,8 +137,9 @@ def process_url(url, schema):
 def html_scrape(extracted_url_list,define_schema):
     urls= extracted_url_list
     """test
-    """
     urls=[urls[0]]
+    """
+    
     schema=define_schema
     df_list = []
 
@@ -215,7 +216,7 @@ def threaded_url_list_pull():
             future = executor.submit(initial_fetch, url_thread)
             futures.append(future)
 
-            if i > 2:
+            if i > 16:
                 break
 
             i += 1
