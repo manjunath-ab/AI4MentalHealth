@@ -9,6 +9,7 @@ import numpy as np
 from pinecone import Pinecone
 from python_to_snowflake import create_snowflake_conn
 
+
 # Specify the columns you want to select
 columns_to_select = [
     'SUPPORT_SYSTEM',
@@ -23,6 +24,8 @@ columns_to_select = [
 # Construct the SQL query
 columns_string = ', '.join(columns_to_select)
 query = f"SELECT {columns_string} FROM CHATBOT_KNOWLEDGE"
+
+conn = create_snowflake_conn() 
 
 # Extract data from Snowflake
 snowflake_data = pd.read_sql_query(query, conn)
