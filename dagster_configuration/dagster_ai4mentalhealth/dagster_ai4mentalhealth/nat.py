@@ -18,19 +18,34 @@ import random
 import time
 import os
 from dagster import asset
-import snowflake.connector
 from dagster_ai4mentalhealth.python_to_snowflake import create_snowflake_conn,upload_to_stage,stage_to_table
 
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
+# disable the AutomationControlled feature of Blink rendering engine
+chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+# disable pop-up blocking
+chrome_options.add_argument('--disable-popup-blocking')
+# start the browser window in maximized mode
+chrome_options.add_argument('--start-maximized')
+# disable extensions
+chrome_options.add_argument('--disable-extensions')
+# disable sandbox mode
+chrome_options.add_argument('--no-sandbox')
+# Allow all cookies, including third-party cookies
+chrome_options.add_argument("--disable-web-security")
+chrome_options.add_argument("--allow-running-insecure-content")
+# disable shared memory usage
+chrome_options.add_argument('--disable-dev-shm-usage')
+
 dotenv_path = Path('c:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 llm = ChatOpenAI(temperature=random.random(), model='gpt-3.5-turbo-0125')
 
-@asset(group_name="blurt_assets")
-def define_schema():
+@asset(group_name="nat_assets")
+def n_define_schema():
  schema = {
     "properties": {
         "mental_illness_title": {"type": "string"},
@@ -46,7 +61,7 @@ def define_schema():
  return schema
 
 
-def extract(content: str, schema: dict):
+def n_extract(content: str, schema: dict):
     prompt = (
         f"Explore and provide detailed insights into all of the following aspects related to mental health. As you provide this information, imagine you are both a compassionate mental health therapist and a empathetic, supportive friend.\n"
         f"1. **Mental Illness Title:** Describe the specific mental health condition or challenge.\n"
@@ -61,18 +76,18 @@ def extract(content: str, schema: dict):
     )
     return create_extraction_chain(schema=schema, llm=llm).invoke(prompt+content)
 
-def initial_fetch(url_thread):
+def n_initial_fetch(url_thread):
    driver = webdriver.Chrome(options=chrome_options)
    driver.get(url_thread)
    # Find all elements with the class "read-link"
-   link_elements = driver.find_elements(By.CLASS_NAME, 'read-link')
+   link_elements = driver.find_elements(By.CLASS_NAME, 'read-more-button')
    # Extract href attribute from each element and store in a list
    href_list = [link.get_attribute("href") for link in link_elements]
    driver.quit()
    return href_list
 
 #url is a list of urls batched for the sake of OPENAI API rate limits
-def process_url(url, schema):
+def n_process_url(url, schema):
     loader = AsyncHtmlLoader(url)
     docs = loader.load()
     bs_transformer = BeautifulSoupTransformer()
@@ -88,7 +103,7 @@ def process_url(url, schema):
     splits = splitter.split_documents(docs_transformed)
 
     try:
-        extracted_content = extract(schema=schema, content=splits[0].page_content)
+        extracted_content = n_extract(schema=schema, content=splits[0].page_content)
     except Exception as e:
         print(e)
         return None
@@ -126,14 +141,14 @@ def process_url(url, schema):
     return df
 
 #urls is a list of urls
-@asset(group_name="blurt_assets")
-def html_scrape(extracted_url_list,define_schema):
-    urls= extracted_url_list
+@asset(group_name="nat_assets")
+def n_html_scrape(n_extracted_url_list,n_define_schema):
+    urls= n_extracted_url_list
     """test
-    
-    """
     urls=[urls[0]]
-    schema=define_schema
+    """
+    
+    schema=n_define_schema
     df_list = []
 
     with ThreadPoolExecutor(max_workers=20) as executor:
@@ -142,7 +157,7 @@ def html_scrape(extracted_url_list,define_schema):
         for i,url in enumerate(urls):
             print(f"Processing URL set {i+1} of {len(urls)}")
             # Submit each URL for processing in the thread pool
-            future = executor.submit(process_url, url, schema)
+            future = executor.submit(n_process_url, url, schema)
             futures.append(future)
 
             # If we've processed a batch of 3 URL sets, wait for a minute
@@ -167,9 +182,9 @@ def html_scrape(extracted_url_list,define_schema):
 
     return df_list
 
-@asset(group_name="blurt_assets")
-def create_df(context, html_scrape):
-    result = pd.concat(html_scrape)
+@asset(group_name="nat_assets")
+def n_create_df(context, n_html_scrape):
+    result = pd.concat(n_html_scrape)
     context.log.info(f"Created DataFrame: {result}")
     result.dropna(subset=['mental_illness_title'], inplace=True)
     if not os.path.exists('staging_files'):
@@ -178,9 +193,9 @@ def create_df(context, html_scrape):
     result.to_csv(os.path.join('staging_files', f'knowledge-{unique_identifier}.csv'), index=False, sep='$',header=True)
     return unique_identifier
 
-@asset(group_name="blurt_assets")
-def publish_to_snowflake(context, create_df):
-    identifier=create_df
+@asset(group_name="nat_assets")
+def n_publish_to_snowflake(context, n_create_df):
+    identifier=n_create_df
     context.log.info(f"Published to Snowflake: {identifier}")
     conn=create_snowflake_conn()
     cursor=conn.cursor()
@@ -190,11 +205,10 @@ def publish_to_snowflake(context, create_df):
     conn.close()
     return
 
-
-@asset(group_name="blurt_assets")
-def threaded_url_list_pull():
+@asset(group_name="nat_assets")
+def n_threaded_url_list_pull():
     num_threads=5
-    base_url="https://www.blurtitout.org/blog/page/"
+    base_url = "https://natashatracy.com/topic/bipolar-blog/page/"
     print('starting the threaded url list pull')
     url_list = []
     i = 1
@@ -206,10 +220,10 @@ def threaded_url_list_pull():
         while True:
             url_thread = base_url + str(i)
             # Submit the task to the thread pool and store the future
-            future = executor.submit(initial_fetch, url_thread)
+            future = executor.submit(n_initial_fetch, url_thread)
             futures.append(future)
 
-            if i > 16:
+            if i > 80:
                 break
 
             i += 1
@@ -221,9 +235,10 @@ def threaded_url_list_pull():
 
     return url_list
 
-@asset(group_name="blurt_assets")
-def extracted_url_list(context, threaded_url_list_pull):
-    result=list(set(threaded_url_list_pull))
+
+@asset(group_name="nat_assets")
+def n_extracted_url_list(context, n_threaded_url_list_pull):
+    result=list(set(n_threaded_url_list_pull))
     #context.log.info(f"Extracted URL list: {result}")
     return result
 
