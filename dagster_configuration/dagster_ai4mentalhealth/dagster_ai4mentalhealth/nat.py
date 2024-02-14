@@ -63,16 +63,16 @@ def n_define_schema():
 
 def n_extract(content: str, schema: dict):
     prompt = (
-        f"Explore and provide detailed insights into all of the following aspects related to mental health. As you provide this information, imagine you are both a compassionate mental health therapist and a empathetic, supportive friend.\n"
-        f"1. **Mental Illness Title:** Describe the specific mental health condition or challenge.\n"
-        f"2. **Mental Illness Story:** Narrate a detailed and emotive story of someone navigating this mental health condition. Include their emotions, challenges, and moments of resilience.\n"
-        f"3. **Coping Mechanism:** Explain the strategies and methods adopted by the individual to cope with their mental health challenges.\n"
-        f"4. **Support System:** Identify and elaborate on the crucial individuals, organizations, or resources that contribute to the individual's well-being.\n"
-        f"5. **Triggers:** Delve into a nuanced exploration of environmental, emotional, or situational triggers that significantly impact or exacerbate the mental health condition.\n"
-        f"6. **Self-Care Practices:** Provide a detailed examination of the daily routines, rituals, and habits that actively contribute to the individual's mental well-being.\n"
-        f"7. **Reflections:** acknowledging progress made and lessons learned, offering a holistic perspective on the individual's mental health experiences.\n"
+        f"Explore and provide detailed insights into all of the following aspects related to bipolar disorder and its various manifestations. As you provide this information, imagine you are both a compassionate mental health therapist and an empathetic, supportive friend.\n"
+        f"1. **Mental Illness Title:** Describe the specific type of bipolar disorder or give it a name based on the individual's experiences narrated in the Mental Illness Story.\n"
+        f"2. **Mental Illness Story:** Narrate a detailed and emotive story of someone navigating this subtype of bipolar disorder or related condition. Include their emotions, challenges, and moments of resilience.\n"
+        f"3. **Coping Mechanism:** Explain the strategies and methods adopted by the individual to cope with the challenges posed by this subtype of bipolar disorder or related condition.\n"
+        f"4. **Support System:** Identify and elaborate on the crucial individuals, organizations, or resources that contribute to the individual's well-being while managing this subtype of bipolar disorder or related condition.\n"
+        f"5. **Triggers:** Delve into a nuanced exploration of environmental, emotional, or situational triggers that significantly impact or exacerbate the symptoms of this subtype of bipolar disorder or related condition.\n"
+        f"6. **Self-Care Practices:** Provide a detailed examination of the daily routines, rituals, and habits that actively contribute to the individual's mental well-being while living with this subtype of bipolar disorder or related condition.\n"
+        f"7. **Reflections:** Acknowledge progress made and lessons learned, offering a holistic perspective on the individual's experiences with this subtype of bipolar disorder or related condition.\n"
         f"If specific data is not available for any of the fields, please add content more closely associated with the mental illness, creating a comprehensive and insightful narrative.\n"
-        f"As you navigate this exploration, envision yourself peeling back layers to reveal a profound understanding of the diverse triggers impacting the individual's mental health."
+        f"As you navigate this exploration, envision yourself peeling back layers to reveal a profound understanding of the diverse triggers impacting the individual's mental health while managing this subtype of bipolar disorder or related condition."
     )
     return create_extraction_chain(schema=schema, llm=llm).invoke(prompt+content)
 
