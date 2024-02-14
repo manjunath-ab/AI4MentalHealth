@@ -73,8 +73,19 @@ def define_schema():
 
 
 def extract(content: str, schema: dict):
-    return create_extraction_chain(schema=schema, llm=llm).invoke("sort the content on what mental health issues they are facing, what is their story?? and finally how they cope with it? :"+content)
-
+    prompt = (
+        f"Explore and provide detailed insights into all of the following aspects related to bipolar disorder and its various manifestations. As you provide this information, imagine you are both a compassionate mental health therapist and an empathetic, supportive friend.\n"
+        f"1. **Mental Illness Title:** Describe the specific type of bipolar disorder or give it a name based on the individual's experiences narrated in the Mental Illness Story.\n"
+        f"2. **Mental Illness Story:** Narrate a detailed and emotive story of someone navigating this subtype of bipolar disorder or related condition. Include their emotions, challenges, and moments of resilience.\n"
+        f"3. **Coping Mechanism:** Explain the strategies and methods adopted by the individual to cope with the challenges posed by this subtype of bipolar disorder or related condition.\n"
+        f"4. **Support System:** Identify and elaborate on the crucial individuals, organizations, or resources that contribute to the individual's well-being while managing this subtype of bipolar disorder or related condition.\n"
+        f"5. **Triggers:** Delve into a nuanced exploration of environmental, emotional, or situational triggers that significantly impact or exacerbate the symptoms of this subtype of bipolar disorder or related condition.\n"
+        f"6. **Self-Care Practices:** Provide a detailed examination of the daily routines, rituals, and habits that actively contribute to the individual's mental well-being while living with this subtype of bipolar disorder or related condition.\n"
+        f"7. **Reflections:** Acknowledge progress made and lessons learned, offering a holistic perspective on the individual's experiences with this subtype of bipolar disorder or related condition.\n"
+        f"If specific data is not available for any of the fields, please add content more closely associated with the mental illness, creating a comprehensive and insightful narrative.\n"
+        f"As you navigate this exploration, envision yourself peeling back layers to reveal a profound understanding of the diverse triggers impacting the individual's mental health while managing this subtype of bipolar disorder or related condition."
+    )
+    return create_extraction_chain(schema=schema, llm=llm).invoke(prompt+content)
 
 def batching_dataframes():
    pass
@@ -270,7 +281,7 @@ def batch_url_list(url_list):
     return [url_list[i:i+batch_size] for i in range(0, len(url_list), batch_size)]
 
 def main():
-    base_url="'https://natashatracy.com/topic/bipolar-blog/"
+    base_url="https://natashatracy.com/topic/bipolar-blog/"
     url_list=list(set(threaded_url_list_pull(base_url)))
     #put in a check to not repeat the same url for future runs
     print('completed the url list')
