@@ -132,9 +132,9 @@ def process_url(url, schema):
 def html_scrape(extracted_url_list,define_schema):
     urls= extracted_url_list
     """test
-    
-    """
     urls=[urls[0]]
+    """
+    
     schema=define_schema
     df_list = []
 
@@ -226,7 +226,7 @@ def threaded_url_list_pull():
 @asset(group_name="blurt_assets")
 def extracted_url_list(context, threaded_url_list_pull):
     result=list(set(threaded_url_list_pull))
-    #context.log.info(f"Extracted URL list: {result}")
+    context.log.info(f"Extracted URL list: {result}")
     return result
 
 

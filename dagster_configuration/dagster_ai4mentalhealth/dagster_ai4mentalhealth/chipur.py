@@ -243,7 +243,7 @@ def c_threaded_url_list_pull():
 @asset(group_name="chipur_assets")
 def c_extracted_url_list(context, c_threaded_url_list_pull):
     result=list(set(c_threaded_url_list_pull))
-    #context.log.info(f"Extracted URL list: {result}")
+    context.log.info(f"Extracted URL list: {result}")
     return result
 
 

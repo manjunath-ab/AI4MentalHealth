@@ -241,7 +241,7 @@ def n_threaded_url_list_pull():
 @asset(group_name="nat_assets")
 def n_extracted_url_list(context, n_threaded_url_list_pull):
     result=list(set(n_threaded_url_list_pull))
-    #context.log.info(f"Extracted URL list: {result}")
+    context.log.info(f"Extracted URL list: {result}")
     return result
 
 
