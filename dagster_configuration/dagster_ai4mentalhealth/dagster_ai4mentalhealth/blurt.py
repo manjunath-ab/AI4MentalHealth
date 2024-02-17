@@ -57,7 +57,9 @@ def extract(content: str, schema: dict):
         f"6. **Self-Care Practices:** Provide a detailed examination of the daily routines, rituals, and habits that actively contribute to the individual's mental well-being.\n"
         f"7. **Reflections:** acknowledging progress made and lessons learned, offering a holistic perspective on the individual's mental health experiences.\n"
         f"If specific data is not available for any of the fields, please add content more closely associated with the mental illness, creating a comprehensive and insightful narrative.\n"
-        f"As you navigate this exploration, envision yourself peeling back layers to reveal a profound understanding of the diverse triggers impacting the individual's mental health."
+        f"As you navigate this exploration, envision yourself peeling back layers to reveal a profound understanding of the diverse triggers impacting the individual's mental health.\n"
+        f"If you are not able to provide specific data for any of the fields, please put in N/A.\n"
+        f"Make sure to keep names and any identifying information confidential.\n"
     )
     return create_extraction_chain(schema=schema, llm=llm).invoke(prompt+content)
 
