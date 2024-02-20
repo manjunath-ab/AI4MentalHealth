@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load environment variables from .env file
-dotenv_path = Path('c:/Users/abhis/.env')
+#dotenv_path = Path('c:/Users/abhis/.env')
+dotenv_path = Path('/home/abhi/.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 
