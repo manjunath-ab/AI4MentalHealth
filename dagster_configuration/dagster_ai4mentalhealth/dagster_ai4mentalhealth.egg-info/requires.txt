@@ -5,6 +5,7 @@ langchain-openai
 langchain-community
 langchain
 selenium
+snowflake-connector-python
 
 [dev]
 dagster-webserver

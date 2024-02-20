@@ -10,7 +10,9 @@ setup(
         "langchain-openai",
         "langchain-community",
         "langchain",
-        "selenium"
+        "selenium",
+        "snowflake-connector-python"
+        "chromadb"
 
 
     ],

@@ -7,7 +7,7 @@ import os
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 # Load environment variables from .env file
-dotenv_path = Path('c:/Users/abhis/.env')
+dotenv_path = Path('/home/abhi/.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 
@@ -111,4 +111,4 @@ response = retrieval_chain.invoke(
     }
 )
 
-response
+print(response['answer'])
