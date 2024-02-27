@@ -12,7 +12,6 @@ dotenv_path = Path('C:/Users/abhis/.env')
 
 load_dotenv(dotenv_path=dotenv_path)
 
-
 snowflake_account = os.getenv('SNOWFLAKE_ACCOUNT')
 snowflake_user = os.getenv('SNOWFLAKE_USER')
 snowflake_password = os.getenv('SNOWFLAKE_PASSWORD')
@@ -20,8 +19,10 @@ snowflake_database = os.getenv('SNOWFLAKE_DATABASE')
 snowflake_schema = os.getenv('SNOWFLAKE_SCHEMA')
 snowflake_warehouse = os.getenv('SNOWFLAKE_WAREHOUSE')
 snowflake_role = os.getenv('SNOWFLAKE_ROLE')
-QUERY = "select * from THERAPIST_DETAILS"
-snowflake_loader = SnowflakeLoader(
+
+
+def snowflake_loader(QUERY):
+ snowflake_loader = SnowflakeLoader(
     query=QUERY,
     user=snowflake_user,
     password=snowflake_password,
@@ -31,101 +32,24 @@ snowflake_loader = SnowflakeLoader(
     schema=snowflake_schema,
     role=snowflake_role
 )
-snowflake_documents = snowflake_loader.load()
+ snowflake_documents = snowflake_loader.load()
+ text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=4)
+ docs = text_splitter.split_documents(snowflake_documents)
+ return docs
 
 
 
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=4)
-docs = text_splitter.split_documents(snowflake_documents)
-#db = Chroma.from_documents(docs, OpenAIEmbeddings())
-db = Chroma.from_documents(docs, OpenAIEmbeddings(), persist_directory="./chroma_db1")
-#db = Chroma(persist_directory="./chroma_db", embedding_function=OpenAIEmbeddings())
 
-query = "Tell me about bipolar disorder and how to cope with it"
-result = db.similarity_search(query)
-# k is the number of chunks to retrieve
-retriever = db.as_retriever(k=4)
+def main():
+    QUERY = "select * from CHATBOT_KNOWLEDGE"
+    QUERY1 = "select * from THERAPIST_DETAILS"
+    docs = snowflake_loader(QUERY)
+    docs1 = snowflake_loader(QUERY1)
+    db = Chroma.from_documents(docs, OpenAIEmbeddings(), persist_directory="../new_knowledge_db")
+    db.add_documents(docs1)
 
-docs = retriever.invoke("how can i battle depression?")
-
-"""
-CHATBOT SECTION
-"""
-from langchain_openai import ChatOpenAI
-
-chat = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.2)
-
-#from langchain_core.messages import HumanMessage
-
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-
-chat = ChatOpenAI(model="gpt-3.5-turbo-1106")
-
-question_answering_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            "Imagine you are a therapist, talk to the user like a friend who understands their problem and keep the answer short..end with a question:\n\n{context}",
-        ),
-        MessagesPlaceholder(variable_name="messages"),
-    ]
-)
-
-document_chain = create_stuff_documents_chain(chat, question_answering_prompt)
-
-"""
-document chain
-"""
-from langchain.memory import ChatMessageHistory
-
-demo_ephemeral_chat_history = ChatMessageHistory()
-
-demo_ephemeral_chat_history.add_user_message("how can I battle depression?")
-
-document_chain.invoke(
-    {
-        "messages": demo_ephemeral_chat_history.messages,
-        "context": docs,
-    }
-)
-
-"""
-retreival chain
-"""
-from typing import Dict
-
-from langchain_core.runnables import RunnablePassthrough
+if __name__ == "__main__":
+    main()
 
 
-def parse_retriever_input(params: Dict):
-    return params["messages"][-1].content
-
-
-retrieval_chain = RunnablePassthrough.assign(
-    context=parse_retriever_input | retriever,
-).assign(
-    answer=document_chain,
-)
-
-response = retrieval_chain.invoke(
-    {
-        "messages": demo_ephemeral_chat_history.messages,
-    }
-)
-
-"""
-CHATTING SECTION
-"""
-demo_ephemeral_chat_history.add_ai_message(response["answer"])
-
-#demo_ephemeral_chat_history.add_user_message("tell me more about that!")
-
-response=retrieval_chain.invoke(
-    {
-        "messages": demo_ephemeral_chat_history.messages,
-    },
-)
-
-print(response['answer'])
 
