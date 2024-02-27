@@ -85,9 +85,10 @@ def display_avatar_image():
     if avatar_image is not None:
         # Display the uploaded image on the sidebar
         st.sidebar.image(avatar_image, use_column_width=True)
+        #I am Zenny! I'm here to be your virtual friend, to chat with you, and to help you find the support and resources you need. Whether you're feeling down and need someone to talk to, or you're looking for information on mental health and therapy, I'm here to listen and assist. So, let's chat and find the help you need!
         st.sidebar.markdown("""
-        <div style="font-family: 'Arial', sans-serif; font-size: 20px; font-style: italic;">
-            "I am Zenny! I'm here to be your virtual friend, to chat with you, and to help you find the support and resources you need. Whether you're feeling down and need someone to talk to, or you're looking for information on mental health and therapy, I'm here to listen and assist. So, let's chat and find the help you need!"
+        <div style="font-family: 'Arial', sans-serif; font-size: 20px; font-style: bold;">
+            Appointment Booking Section
         </div>
     """, unsafe_allow_html=True)
 
@@ -100,9 +101,6 @@ def get_retriever_tool(retriever):
     return tool
 
 
-"""
-scheduler
-"""
 # create random schedule
 def createSchedule(daysAhead=5, perDay=8):
     schedule = {}
@@ -217,9 +215,7 @@ def dayOfWeek(date):
 
 
 
-"""
-end scheduler
-"""
+
 def main():
     load_environment_variables()
     chat, db = initialize_chat_and_db()
@@ -262,10 +258,6 @@ def main():
     ]
     )
     agent = create_openai_tools_agent(chat, tools, question_answering_prompt)
-    """
-    memory = ConversationBufferMemory(memory_key="chat_history")
-    agent = initialize_agent(tools, chat, agent='zero-shot-react-description', verbose=True)
-    """
     agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
     demo_ephemeral_chat_history = initialize_chat_history()
     conversational_agent_executor = RunnableWithMessageHistory(
@@ -279,12 +271,17 @@ def main():
     initialize_session_state()
     response_container = st.container()
     container = st.container()
-
+    appointment_container = st.container()
+    pattern_dr = r'Dr\. [A-Z][a-z]+ [A-Z][a-z]+'
+    app_button = st.button(label='book appointment')
     with container:
         with st.form(key='my_form', clear_on_submit=True):
             user_input = st.text_input("Chat:", placeholder="Talk to ZEN.AI 👉", key='input')
             submit_button = st.form_submit_button(label='Send')
+            
+            
             if submit_button and user_input:
+                st.success(f"User input: {user_input}")
                 demo_ephemeral_chat_history.add_user_message(user_input)
                 
               
@@ -293,32 +290,49 @@ def main():
                        {"configurable": {"session_id": "unused"}},
                         )
                 output = response['output']
-                # Define a regular expression pattern to match date time strings
+                pattern_dr = r'Dr\. [A-Z][a-z]+ [A-Z][a-z]+'
                 pattern_a = r'\d{1,2}:\d{2}'
                 pattern_date=r'(\d{2}/\d{2}/\d{2})'
-                
-                # Check if "today's" is present in the output string
-                if "today's" in output.lower():
-                  match_list = re.findall(pattern_a, output)
-                  matches={'today':1, 'matches':match_list}
-                else:
-                  match_date = re.findall(pattern_date, output)
-                  match_list=re.findall(pattern_a, output)
-                  matches={'today':0, 'matches':match_list}
 
-
-                
-                if len(matches)> 0:
-                  print("matches")
-                  if matches['today'] ==1:
-                   for match in matches['matches']:
-                     st.form_submit_button(f"{today.strftime('%m/%d/%y')} : {match}")
-                  else:
-                    for match in matches['matches']:
-                      st.form_submit_button(f'{match_date[0]} : {match}')
                 st.session_state['past'].append(user_input)
                 st.session_state['generated'].append(output)
+                
+        
+    matches=[]
+    try:
+        matches=re.findall(pattern_dr, st.session_state['generated'][-1])
+    except:
+        pass
+    if len(matches)>0 and app_button:
+                st.success("Redirecting you to appointments page")
+                
+                with st.sidebar.form(key='appointment_form', clear_on_submit=True):
+                  response=st.selectbox("Select a doctor", options=matches)
+                  if response:
+                      st.success(f"{response} Doctor selected")
+                      #extract available times for doctor and display it as a select box
+                      doctor_availability = {
+    "Dr.Michelle Brown": {
+        "Monday": ["09:00 AM", "10:00 AM", "11:00 AM"],
+        "Tuesday": ["09:00 AM", "10:00 AM", "11:00 AM"],
+        "Wednesday": ["09:00 AM", "10:00 AM", "11:00 AM"],
+        "Thursday": ["09:00 AM", "10:00 AM", "11:00 AM"],
+        "Friday": ["09:00 AM", "10:00 AM", "11:00 AM"],
+        "Saturday": [],
+        "Sunday": []
+    }
+}
+                      st.selectbox("Select a date", options=list(doctor_availability["Dr.Michelle Brown"].keys()))
+                  submit_button = st.form_submit_button(label='Submit')
+                  #integrate email part of it
 
+    if len(matches)==0 and app_button:
+                st.success("No doctor recommended by chat.please spend some time chatting with me to get a doctor recommendation.")
+    
+
+                
+
+    
     if st.session_state['generated']:
         with response_container:
             for i in range(len(st.session_state['generated'])):
@@ -326,17 +340,11 @@ def main():
                 message(st.session_state["generated"][i], key=str(i), avatar_style="thumbs")
                 continue
 
-    end_chat_checkbox = st.checkbox("I entered all the details.")
+
     end_chat_button = st.button("End Chat")
 
-    if end_chat_button and end_chat_checkbox:
-        # Extract Process to snowflake
-        st.success("An appointment will be scheduled for you.")
-        # Clear session state
-        st.session_state['past'] = []
-        st.session_state['generated'] = []
-        # Refresh the app
-    elif end_chat_button:
+
+    if end_chat_button:
         # Refresh the app without clearing session state
         st.session_state['past'] = []
         st.session_state['generated'] = []
