@@ -24,7 +24,8 @@ from faker import Faker
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
-
+from snowflake_integrator import get_availability,create_snowflake_conn
+from email_patient import send_email
 fake = Faker()
 today = datetime.datetime.now()
 hours = (9, 18)   # open hours
@@ -218,6 +219,7 @@ def dayOfWeek(date):
 
 def main():
     load_environment_variables()
+    conn=create_snowflake_conn()
     chat, db = initialize_chat_and_db()
     #question = "mental health and therapy"
     global schedule
@@ -273,7 +275,7 @@ def main():
     container = st.container()
     appointment_container = st.container()
     pattern_dr = r'Dr\. [A-Z][a-z]+ [A-Z][a-z]+'
-    app_button = st.button(label='book appointment')
+    
     with container:
         with st.form(key='my_form', clear_on_submit=True):
             user_input = st.text_input("Chat:", placeholder="Talk to ZEN.AI 👉", key='input')
@@ -303,31 +305,38 @@ def main():
         matches=re.findall(pattern_dr, st.session_state['generated'][-1])
     except:
         pass
-    if len(matches)>0 and app_button:
-                st.success("Redirecting you to appointments page")
-                
-                with st.sidebar.form(key='appointment_form', clear_on_submit=True):
+    
+    
+    with st.sidebar.form(key='appointment_form', clear_on_submit=True):
                   response=st.selectbox("Select a doctor", options=matches)
+                  date=""
                   if response:
                       st.success(f"{response} Doctor selected")
                       #extract available times for doctor and display it as a select box
-                      doctor_availability = {
-    "Dr.Michelle Brown": {
-        "Monday": ["09:00 AM", "10:00 AM", "11:00 AM"],
-        "Tuesday": ["09:00 AM", "10:00 AM", "11:00 AM"],
-        "Wednesday": ["09:00 AM", "10:00 AM", "11:00 AM"],
-        "Thursday": ["09:00 AM", "10:00 AM", "11:00 AM"],
-        "Friday": ["09:00 AM", "10:00 AM", "11:00 AM"],
-        "Saturday": [],
-        "Sunday": []
-    }
-}
-                      st.selectbox("Select a date", options=list(doctor_availability["Dr.Michelle Brown"].keys()))
-                  submit_button = st.form_submit_button(label='Submit')
-                  #integrate email part of it
+                      doctor_availability = get_availability(conn,response)
+                      #make a list of sets
+                      intermed=[[(x,y) for y in doctor_availability[x]] for x in doctor_availability.keys()]
+                      final_ops=[]
+                      for x in intermed:
+                          final_ops.extend(x) 
+                      
+                      date=st.selectbox("Select a date", options=final_ops)
+                  
+                  s_button = st.form_submit_button(label='Submit')
+                  if s_button:
+                      
+                      st.session_state.date=date
+                      st.session_state.response=response
+                      
+                      try:
+                          send_email(st.session_state.email,st.session_state.date,st.session_state.response)
+                      except:
+                          st.error("Appointment not booked, please try again later.")
+                      st.success(f"Appointment booked for {st.session_state.email}")
 
-    if len(matches)==0 and app_button:
-                st.success("No doctor recommended by chat.please spend some time chatting with me to get a doctor recommendation.")
+                      
+
+    
     
 
                 
