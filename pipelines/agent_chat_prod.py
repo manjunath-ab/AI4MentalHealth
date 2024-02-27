@@ -21,6 +21,9 @@ import calendar
 import random
 import json
 from faker import Faker
+from langchain.agents import initialize_agent, Tool
+from langchain.chains.conversation.memory import ConversationBufferMemory
+import re
 
 fake = Faker()
 today = datetime.datetime.now()
@@ -101,7 +104,7 @@ def get_retriever_tool(retriever):
 scheduler
 """
 # create random schedule
-def createSchedule(daysAhead=5, perDay=5):
+def createSchedule(daysAhead=5, perDay=8):
     schedule = {}
     for d in range(0, daysAhead):
         date = (today + datetime.timedelta(days=d)).strftime('%m/%d/%y')
@@ -116,38 +119,40 @@ def createSchedule(daysAhead=5, perDay=5):
 
 # get available times for a date
 def getAvailTimes(date, num=10):
-    schedule = loadSchedule()
 
-    if '/' not in date or 'mm' in date:
-        return 'date parameter must be in format: mm/dd/yy'
-
-    if date not in schedule:
-        return 'that day is entirely open, all times are available'
-
-    hoursAvail = 'hours available on %s are ' % date
-
-    for h in range(hours[0], hours[1]):
-        if str(h) not in schedule[date]:
-            hoursAvail += str(h) +':00, '
-            num -= 1
-            if num == 0:
-                break
+    #schedule=createSchedule()
+    if '/' not in date:
+        return 'Date parameter must be in format: mm/dd/yy'
     
-    if num > 0:
-        hoursAvail = hoursAvail[:-2] +' - all other times are reserved'
+    
+    if date in schedule:
+        hoursAvail = 'Hours available on %s are ' % date
+        for h in range(hours[0], hours[1] + 1):
+            if str(h) not in schedule[date]:
+                hoursAvail += str(h) + ':00, '
+                num -= 1
+                if num == 0:
+                    break
+
+        if num > 0:
+            hoursAvail = hoursAvail[:-2] + ' - all other times are reserved'
+        else:
+            hoursAvail = hoursAvail[:-2]
+
+        return hoursAvail
     else:
-        hoursAvail = hoursAvail[:-2]
-        
-    return hoursAvail
+        return 'That day is entirely open. All times are available.'
 
-# schedule available time
+
+
+# sche# schedule available time
 def scheduleTime(dateTime):
-    schedule = loadSchedule()
-
     date, time = dateTime.split(',')
     
     if not date or not time:
-        return "sorry parameters must be date and time comma separated, for example: `12/31/23, 10:00` would be the input if for Dec 31'st 2023 at 10am"
+        return "Sorry, parameters must be date and time comma-separated. For example, '12/31/23, 10:00' would be the input for Dec 31, 2023, at 10 AM."
+    if date not in schedule:
+        return 'No schedule available yet for this date.'
 
     # get hours
     if ':' in time:
@@ -157,27 +162,40 @@ def scheduleTime(dateTime):
         if timeHour not in schedule[date]:
             if timeHour >= hours[0] and timeHour <= hours[1]:
                 schedule[date][timeHour] = fake.name()
-                saveSchedule(schedule)
-                print('Updated schedule json...')
-                return 'thank you, appointment scheduled for %s under name %s' % (time, schedule[date][timeHour])
+                saveSchedule(schedule)  # Corrected line: passing the schedule variable
+                return 'Thank you, the appointment is scheduled for %s under the name %s.' % (time, schedule[date][timeHour])
             else:
-                return '%s is after hours, please select a time during business hours' % time
+                return '%s is after hours. Please select a time during business hours.' % time
         else:
-            return 'sorry that time (%s) on %s is not available' % (time, date)
+            return 'Sorry, that time (%s) on %s is not available.' % (time, date)
     else:
-        return '%s is not a valid time, time must be in format hh:mm'
+        return '%s is not a valid time. Time must be in the format hh:mm.' % time
+
+
+# Load schedule json
+def loadSchedule():
+    global schedule
+    
+    with open('schedule.json') as json_file:
+        return json.load(json_file)
+
     
 # save schedule json
 def saveSchedule(schedule):
     with open('schedule.json', 'w') as f:
         json.dump(schedule, f)
     
+
+import os.path
 # load schedule json
 def loadSchedule():
     global schedule
     
-    with open('schedule.json') as json_file:
+
+    if os.path.exists('schedule.json'):
+     with open('schedule.json') as json_file:
         return json.load(json_file)
+
 
 # get today's date
 def todayDate():
@@ -206,6 +224,8 @@ def main():
     load_environment_variables()
     chat, db = initialize_chat_and_db()
     #question = "mental health and therapy"
+    global schedule
+    schedule = createSchedule()
     retriever= create_retriever(db)
     tools = [
     Tool(
@@ -242,6 +262,10 @@ def main():
     ]
     )
     agent = create_openai_tools_agent(chat, tools, question_answering_prompt)
+    """
+    memory = ConversationBufferMemory(memory_key="chat_history")
+    agent = initialize_agent(tools, chat, agent='zero-shot-react-description', verbose=True)
+    """
     agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
     demo_ephemeral_chat_history = initialize_chat_history()
     conversational_agent_executor = RunnableWithMessageHistory(
@@ -269,6 +293,29 @@ def main():
                        {"configurable": {"session_id": "unused"}},
                         )
                 output = response['output']
+                # Define a regular expression pattern to match date time strings
+                pattern_a = r'\d{1,2}:\d{2}'
+                pattern_date=r'(\d{2}/\d{2}/\d{2})'
+                
+                # Check if "today's" is present in the output string
+                if "today's" in output.lower():
+                  match_list = re.findall(pattern_a, output)
+                  matches={'today':1, 'matches':match_list}
+                else:
+                  match_date = re.findall(pattern_date, output)
+                  match_list=re.findall(pattern_a, output)
+                  matches={'today':0, 'matches':match_list}
+
+
+                
+                if len(matches)> 0:
+                  print("matches")
+                  if matches['today'] ==1:
+                   for match in matches['matches']:
+                     st.form_submit_button(f"{today.strftime('%m/%d/%y')} : {match}")
+                  else:
+                    for match in matches['matches']:
+                      st.form_submit_button(f'{match_date[0]} : {match}')
                 st.session_state['past'].append(user_input)
                 st.session_state['generated'].append(output)
 
