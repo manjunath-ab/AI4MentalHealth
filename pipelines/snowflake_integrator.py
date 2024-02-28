@@ -21,10 +21,10 @@ def create_snowflake_conn():
  conn = snowflake.connector.connect(
     user='',
     password='',
-    account='ceb13564.us-east-1',
-    warehouse='COMPUTE_WH',
-    database='AI4MENTALHEALTH',
-    schema='STAGING'
+    account='',
+    warehouse='',
+    database='',
+    schema=''
 )
  return conn
 
@@ -40,4 +40,11 @@ def get_availability(conn,doctor_name):
     cursor.close()
 
     return availability
+
+def insert_into_therapist_view(conn,doctor_name,patient_email,summary):
+    summary=json.dumps(summary)
+    summary = summary.replace("'", "")
+    cursor = conn.cursor()
+    cursor.execute(f"INSERT INTO THERAPIST_VIEW (THERAPIST_NAME, PATIENT_EMAIL,SUMMARY) SELECT '{doctor_name}', '{patient_email}',PARSE_JSON('{summary}')")
+    cursor.close()
 

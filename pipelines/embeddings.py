@@ -1,10 +1,6 @@
 import pandas as pd
 from transformers import BertTokenizer, BertModel
 import torch
-import snowflake.connector
-import sqlalchemy
-from embeddings import embeddings
-import pinecone
 import numpy as np
 from pinecone import Pinecone
 from python_to_snowflake import create_snowflake_conn
@@ -23,7 +19,7 @@ columns_to_select = [
 
 # Construct the SQL query
 columns_string = ', '.join(columns_to_select)
-query = f"SELECT {columns_string} FROM CHATBOT_KNOWLEDGE"
+query = f"SELECT {columns_string} FROM CHATBOT_KNOWLEDGE LIMIT 5"
 
 conn = create_snowflake_conn() 
 
@@ -50,9 +46,9 @@ for text in text_data:
 ids = range(len(embeddings))
 
 # Create a list of items with IDs and embeddings
-items = [{'id': str(i), 'embedding': embedding.tolist()} for i, embedding in zip(ids, embeddings)]
+items = [{'id': str(i), 'values': embedding.tolist()} for i, embedding in zip(ids, embeddings)]
 
-pc = pinecone(api_key="")
+pc = Pinecone(api_key="99162b48-9be5-4cac-b0a7-39c60e3218cc")
 
 index = pc.Index("chatbot-knowledgebase")
 # Name of the Pinecone index
@@ -62,7 +58,7 @@ index_name = "chatbot-knowledgebase"
 index = pc.Index(index_name)
 
 # Select the first 100 items from the list
-items_to_insert = items[:100]
+items_to_insert = items[:5]
 
 # Upsert items into the Pinecone index
 index.upsert(vectors=items_to_insert)
