@@ -41,3 +41,10 @@ def get_availability(conn,doctor_name):
 
     return availability
 
+def insert_into_therapist_view(conn,doctor_name,patient_email,summary):
+    summary=json.dumps(summary)
+    summary = summary.replace("'", "")
+    cursor = conn.cursor()
+    cursor.execute(f"INSERT INTO THERAPIST_VIEW (THERAPIST_NAME, PATIENT_EMAIL,SUMMARY) SELECT '{doctor_name}', '{patient_email}',PARSE_JSON('{summary}')")
+    cursor.close()
+

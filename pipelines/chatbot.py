@@ -1,164 +1,197 @@
-# import streamlit as st
-# from langchain_community.document_loaders.snowflake_loader import SnowflakeLoader
-# from dotenv import load_dotenv
-# from pathlib import Path
-# from langchain_community.embeddings import HuggingFaceEmbeddings
-# from langchain.text_splitter import CharacterTextSplitter
-# import os
-# from langchain_community.vectorstores import Chroma
-# from langchain_openai import OpenAIEmbeddings
-# from langchain_openai import ChatOpenAI
-# from langchain.chains.combine_documents import create_stuff_documents_chain
-# from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-# from langchain.memory import ChatMessageHistory
-# from langchain_core.runnables import RunnablePassthrough
-# from typing import Dict
-
-# # Load environment variables from .env file
-# dotenv_path = Path('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env')
-# load_dotenv(dotenv_path=dotenv_path)
-
-# # Initialize Streamlit app
-# st.title("Mental Health Chatbot")
-
-# # Load embeddings
-# db = Chroma(persist_directory="./chroma_db", embedding_function=OpenAIEmbeddings())
-
-# # Define Streamlit UI elements
-# query = st.text_input("Enter your query:", "Tell me about bipolar disorder and how to cope with it")
-# if st.button("Submit"):
-#     # Perform similarity search
-#     result = db.similarity_search(query)
-#     retriever = db.as_retriever(k=4)
-#     docs = retriever.invoke("how can i battle depression?")
-    
-#     # Initialize ChatOpenAI model
-#     chat = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.2)
-
-#     # Define ChatPromptTemplate
-#     question_answering_prompt = ChatPromptTemplate.from_messages(
-#         [
-#             (
-#                 "system",
-#                 "Imagine you are a therapist, talk to the user like a friend who understands their problem and keep the answer short..end with a question:\n\n{context}",
-#             ),
-#             MessagesPlaceholder(variable_name="messages"),
-#         ]
-#     )
-
-#     # Create document chain
-#     document_chain = create_stuff_documents_chain(chat, question_answering_prompt)
-
-#     # Define parse_retriever_input function
-#     def parse_retriever_input(params: Dict):
-#         return params["messages"][-1].content
-
-#     # Define retrieval_chain
-#     retrieval_chain = RunnablePassthrough.assign(
-#         context=parse_retriever_input | retriever,
-#     ).assign(
-#         answer=document_chain,
-#     )
-
-#     # Invoke retrieval_chain
-#     demo_ephemeral_chat_history = ChatMessageHistory()
-#     demo_ephemeral_chat_history.add_user_message(query)
-#     response = retrieval_chain.invoke(
-#         {
-#             "messages": demo_ephemeral_chat_history.messages,
-#         }
-#     )
-
-#     # Display response
-#     st.text_area("Response:", value=response['answer'])
 import streamlit as st
-from langchain_community.document_loaders.snowflake_loader import SnowflakeLoader
 from dotenv import load_dotenv
 from pathlib import Path
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-import os
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.agents.format_scratchpad.openai_tools import (
+    format_to_openai_tool_messages,
+)
 from langchain.memory import ChatMessageHistory
-from langchain_core.runnables import RunnablePassthrough
-from typing import Dict
+
+
 
 # Load environment variables from .env file
-dotenv_path = Path('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env')
+#dotenv_path = Path('/home/abhi/.env')
+dotenv_path = Path('C:/Users/abhis/.env')
 load_dotenv(dotenv_path=dotenv_path)
-
-# Initialize Streamlit app
-st.title("Mental Health Chatbot")
-
-# Initialize chat history
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-# Load embeddings
-db = Chroma(persist_directory="./chroma_db", embedding_function=OpenAIEmbeddings())
-
-# Initialize ChatOpenAI model
+#pipelines/chroma_db journey
 chat = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.2)
+db = Chroma(persist_directory="../new_knowledge_db",embedding_function=OpenAIEmbeddings())
+#If the context doesn't contain any relevant information to the question, don't make something up and just say "I don't know":
 
-# Define ChatPromptTemplate
+SYSTEM_TEMPLATE = """
+Imagine you are a human friend, talk to the user like a friend who understands their problem and keep the reply short.End with a follow up question. 
+If the user asks you about therapists then provide details such as the therapist's name, location, and description.
+When the user asks to book an appointment, ask about preferences such as location and preferred timings for the appointment.After user input, ask a question to keep the conversation going.
+If the user question is not relevant to mental health or therapists details, don't make something up and just say "I don't know":
+
+<context>
+{context}
+</context>
+"""
+retriever = db.as_retriever(k=4)
+docs=retriever.invoke("how can i battle depression?")
+#print(docs)
 question_answering_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "Imagine you are a therapist, talk to the user like a friend who understands their problem and keep the answer short..end with a question:\n\n{context}",
+            SYSTEM_TEMPLATE,
         ),
         MessagesPlaceholder(variable_name="messages"),
     ]
 )
 
-# Create document chain
 document_chain = create_stuff_documents_chain(chat, question_answering_prompt)
 
-# Define parse_retriever_input function
-def parse_retriever_input(params: Dict):
-    messages = params["messages"]
-    if messages:
-        return messages[-1]  # Return the last message
-    else:
-        return ""  # Return empty string if there are no messages
 
-# Define retrieval_chain
-retriever = db.as_retriever(k=4)
+from langchain.memory import ChatMessageHistory
+
+demo_ephemeral_chat_history = ChatMessageHistory()
+
+
+document_chain.invoke(
+    {
+        "messages": demo_ephemeral_chat_history.messages,
+        "context": docs,
+    }
+)
+
+from typing import Dict
+
+from langchain_core.runnables import RunnablePassthrough
+
+
+def parse_retriever_input(params: Dict):
+    return params["messages"][-1].content
+
+
 retrieval_chain = RunnablePassthrough.assign(
     context=parse_retriever_input | retriever,
 ).assign(
     answer=document_chain,
 )
+demo_ephemeral_chat_history.add_user_message("how can I battle depression?")
+response = retrieval_chain.invoke(
+    {
+        "messages": demo_ephemeral_chat_history.messages,
+    }
+)
 
-# Display conversation history
-st.write("Conversation History:")
-for message in st.session_state.chat_history:
-    if message.startswith("You:"):
-        st.write(f"💬 **You:** {message[5:]}")
-    elif message.startswith("System:"):
-        st.write(f"🤖 **System:** {message[8:]}")
 
-# User input
-st.write("Your Message:")
-user_query = st.text_input("")
+demo_ephemeral_chat_history.add_ai_message(response["answer"])
 
-# Send button
-if st.button("Send"):
-    # Add user message to chat history
-    user_message = f"You: {user_query}"
-    st.session_state.chat_history.append(user_message)
-    
-    # Invoke retrieval_chain
-    response = retrieval_chain.invoke(
-        {
-            "messages": [message.split(": ")[1] for message in st.session_state.chat_history if message.startswith("You:")],
-        }
+#demo_ephemeral_chat_history.add_user_message("tell me more about that!")
+
+response=retrieval_chain.invoke(
+    {
+        "messages": demo_ephemeral_chat_history.messages,
+    },
+)
+
+# Streamlit app
+
+from streamlit_chat import message
+# Set page title and theme to dark
+
+# Change the title formatting to white and blue
+st.image("zen.jpg", width=300)
+
+# Upload an image on the sidebar
+avatar_image = "avatar.jpg"
+
+# Check if an image file is uploaded
+if avatar_image is not None:
+    # Display the uploaded image on the sidebar
+    st.sidebar.image(avatar_image, use_column_width=True)
+    st.sidebar.markdown("""
+    <div style="font-family: 'Arial', sans-serif; font-size: 20px; font-style: italic;">
+        "I am Zenny! I'm here to be your virtual friend, to chat with you, and to help you find the support and resources you need. Whether you're feeling down and need someone to talk to, or you're looking for information on mental health and therapy, I'm here to listen and assist. So, let's chat and find the help you need!"
+    </div>
+""", unsafe_allow_html=True)
+# Initialize chat history
+if 'history' not in st.session_state:
+        st.session_state['history'] = []
+
+    # Initialize messages
+if 'generated' not in st.session_state:
+        st.session_state['generated'] = ["Hello ! I'm Zenny.Ask me about therapy, mental health, or anything you want to talk about "]
+
+if 'past' not in st.session_state:
+        st.session_state['past'] = ["Hey"]
+response_container = st.container()
+container = st.container()
+
+with container:
+    with st.form(key='my_form', clear_on_submit=True):
+        user_input = st.text_input("Chat:", placeholder="Talk to ZEN.AI 👉", key='input')
+        submit_button = st.form_submit_button(label='Send')
+if submit_button and user_input:
+
+    demo_ephemeral_chat_history.add_user_message(user_input)
+
+    document_chain.invoke(
+    {
+        "messages": demo_ephemeral_chat_history.messages,
+        "context": retriever.invoke(user_input),
+    }
     )
+
+    print(retriever.invoke(user_input))
+    retrieval_chain = RunnablePassthrough.assign(
+    context=parse_retriever_input | retriever,
+     ).assign(
+    answer=document_chain,
+    )
+
     
-    # Add system response to chat history
-    system_message = f"System: {response['answer']}"
-    st.session_state.chat_history.append(system_message)
+
+    response=retrieval_chain.invoke(
+    {
+        "messages": demo_ephemeral_chat_history.messages,
+    },
+    )
+
+    
+    output = response['answer']
+
+    st.session_state['past'].append(user_input)
+    st.session_state['generated'].append(output)
+
+if st.session_state['generated']:
+    with response_container:
+        for i in range(len(st.session_state['generated'])):
+          message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
+    
+          message(st.session_state["generated"][i], key=str(i), avatar_style="thumbs")
+          continue
+
+
+
+# Create a checkbox to determine if the chat should end
+end_chat_checkbox = st.checkbox("I entered all the details.")
+
+end_chat_button = st.button("End Chat")
+
+if end_chat_button and end_chat_checkbox:
+
+    #Extract Process to snowflake
+
+    st.success("An appointment will be scheduled for you.")
+
+    # Clear session state
+    st.session_state['past'] = []
+    st.session_state['generated'] = []
+
+    # Refresh the app
+    
+elif end_chat_button:
+    # Refresh the app without clearing session state
+    st.session_state['past'] = []
+    st.session_state['generated'] = []
+
+    # Refresh the app
+    st.experimental_rerun()
