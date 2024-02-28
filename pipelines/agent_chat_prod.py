@@ -34,7 +34,7 @@ hours = (9, 18)   # open hours
 
 
 def load_environment_variables():
-    dotenv_path = Path('C:/Users/abhis/.env')
+    dotenv_path = Path('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env')
     load_dotenv(dotenv_path=dotenv_path)
 
 def initialize_chat_and_db():

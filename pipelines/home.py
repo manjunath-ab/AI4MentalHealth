@@ -38,6 +38,11 @@ def main():
         st.session_state.is_logged_in = login.main()
         st.session_state.is_logged_in=True
 
+    elif option == "Dashboard":  # Add this new condition
+        if st.session_state.is_logged_in:
+            dashboard.main()  # Call the main function of the therapist dashboard
+        else:
+            st.write("Please log in to access the therapist dashboard.")
 
     else:
         st.session_state.is_logged_in = login.main()
