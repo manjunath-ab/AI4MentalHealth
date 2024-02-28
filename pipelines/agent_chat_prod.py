@@ -24,10 +24,12 @@ from faker import Faker
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
-from snowflake_integrator import get_availability,create_snowflake_conn
+from snowflake_integrator import get_availability,create_snowflake_conn,insert_into_therapist_view
 from email_patient import send_email
+from create_event import create_event,get_credentials,build
 fake = Faker()
 today = datetime.datetime.now()
+from langchain.chains import create_extraction_chain
 hours = (9, 18)   # open hours
 
 
@@ -213,7 +215,36 @@ def dayOfWeek(date):
         return calendar.day_name[theDate.weekday()]
     
 #########
+def define_schema():
+ schema = {
+    "properties": {
+        "mental_illness_title": {"type": "string"},
+        "mental_illness_story": {"type": "string"},
+        "coping_mechanism": {"type": "string"},
+        "support_system": {"type": "string"},
+        "triggers": {"type": "string"},      
+        "self_care_practices:": {"type": "string"},
+        "reflections": {"type": "string"},
+    },
+    "required": ["mental_illness_title","mental_illness_story","coping_mechanism","support_system","triggers","self_care_practices","reflections"],
+ }
+ return schema
 
+
+def extract(chat,content: str, schema: dict):
+    prompt = (
+        f"Explore and provide detailed insights into all of the following aspects related to mental health. As you provide this information, imagine you are both a compassionate mental health therapist and a empathetic, supportive friend.\n"
+        f"1. **Mental Illness Title:** Describe the specific mental health condition or challenge.\n"
+        f"2. **Mental Illness Story:** Narrate a detailed and emotive story of someone navigating this mental health condition. Include their emotions, challenges, and moments of resilience.\n"
+        f"3. **Coping Mechanism:** Explain the strategies and methods adopted by the individual to cope with their mental health challenges.\n"
+        f"4. **Support System:** Identify and elaborate on the crucial individuals, organizations, or resources that contribute to the individual's well-being.\n"
+        f"5. **Triggers:** Delve into a nuanced exploration of environmental, emotional, or situational triggers that significantly impact or exacerbate the mental health condition.\n"
+        f"6. **Self-Care Practices:** Provide a detailed examination of the daily routines, rituals, and habits that actively contribute to the individual's mental well-being.\n"
+        f"7. **Reflections:** acknowledging progress made and lessons learned, offering a holistic perspective on the individual's mental health experiences.\n"
+        f"If you are not able to provide specific data for any of the fields, please put in N/A.\n"
+        f"Make sure to keep names and any identifying information confidential.\n"
+    )
+    return create_extraction_chain(schema=schema, llm=chat).invoke(prompt+content)
 
 
 
@@ -311,7 +342,7 @@ def main():
                   response=st.selectbox("Select a doctor", options=matches)
                   date=""
                   if response:
-                      st.success(f"{response} Doctor selected")
+                      #st.success(f"{response} Doctor selected")
                       #extract available times for doctor and display it as a select box
                       doctor_availability = get_availability(conn,response)
                       #make a list of sets
@@ -327,12 +358,32 @@ def main():
                       
                       st.session_state.date=date
                       st.session_state.response=response
-                      
                       try:
-                          send_email(st.session_state.email,st.session_state.date,st.session_state.response)
-                      except:
-                          st.error("Appointment not booked, please try again later.")
-                      st.success(f"Appointment booked for {st.session_state.email}")
+                      
+                       send_email(st.session_state.email,st.session_state.date,st.session_state.response)
+                       st.success(f"Appointment booked for {st.session_state.email}")
+                       creds=get_credentials()
+                       service = build("calendar", "v3", credentials=creds)
+                       # Create a Google Calendar event
+                       create_event(service,st.session_state.email,'zenaidemo111@gmail.com',st.session_state.response)
+                      
+                          #insert schema into snowflake
+                       schema=define_schema()
+                       content=st.session_state["past"]
+                       #st.write(type(content))
+                       summary=extract(chat,str(content), schema)
+                       #st.write(summary)
+                          #insert into snowflake
+                          
+                       insert_into_therapist_view(conn,st.session_state.response,st.session_state.email,summary["text"][0])
+                       
+                      except Exception as e:
+                        st.error(f"Appointment not booked, please try again later. {e}")
+
+
+                      
+                      
+                      
 
                       
 

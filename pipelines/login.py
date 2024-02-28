@@ -9,7 +9,7 @@ from snowflake_integrator import create_snowflake_conn
 # Function to retrieve user credentials
 def retrieve_credentials(conn,email):
     cursor = conn.cursor()
-    cursor.execute("SELECT Password FROM UserCredentials WHERE Email = %s", (email,))
+    cursor.execute("SELECT Password,Authority FROM UserCredentials WHERE Email = %s", (email,))
     result = cursor.fetchone()
     cursor.close()
     return result
@@ -20,6 +20,7 @@ def login(password, email,conn):
     result = retrieve_credentials(conn,email)
     if result is not None and result[0] == password:
         st.session_state.email=email
+        st.session_state.user_type = result[1]
         st.success("Login successful!")
     else:
         st.error("Invalid credentials. Please try again.")
