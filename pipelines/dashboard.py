@@ -12,10 +12,13 @@ import plotly.express as px
 import numpy  as np
 import json
 import calendar
+import plotly.graph_objects as go
+import plotly.express as px
+
 
 def main():
     # Load .env environment variables
-    dotenv_path = '/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env'  # Specify your dotenv path
+    dotenv_path = '/Users/abhis/.env'  # Specify your dotenv path
     load_dotenv(dotenv_path=dotenv_path)
 
     # Set up Snowflake connection parameters
@@ -86,7 +89,7 @@ def main():
 
 
 
-    import plotly.graph_objects as go
+    
 
     st.header('Number of Patients by Therapist Specialization')
     selected_specializations = st.multiselect('Select Specializations', therapists_df['SPECIALIZATION'].unique())
@@ -100,9 +103,7 @@ def main():
     fig.update_layout(title='Number of Patients for Selected Specializations', xaxis_title='Specialization', yaxis_title='Number of Patients')
     st.plotly_chart(fig)
 
-    import streamlit as st
-    import pandas as pd
-    import json
+  
 
     # Assuming therapists_df is your DataFrame containing all the details
     def display_selected_therapist_details(therapists_df):
@@ -137,9 +138,7 @@ def main():
     display_selected_therapist_details(therapists_df)
 
 
-    import plotly.express as px
-    import streamlit as st
-    import pandas as pd
+   
 
     st.header('Distribution of Patient Visits')
 
