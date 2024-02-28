@@ -12,6 +12,21 @@ def main():
         st.session_state.is_logged_in = False
 
     option = st.sidebar.selectbox("Menu", ["Chat", "Sign Up", "Login","Therapist View","Admin Dashboard"])
+    st.image("zen.jpg", width=300)
+
+    # Upload an image on the sidebar
+    avatar_image = "avatar.jpg"
+
+    # Check if an image file is uploaded
+    if avatar_image is not None:
+        # Display the uploaded image on the sidebar
+        st.sidebar.image(avatar_image, use_column_width=True)
+        #I am Zenny! I'm here to be your virtual friend, to chat with you, and to help you find the support and resources you need. Whether you're feeling down and need someone to talk to, or you're looking for information on mental health and therapy, I'm here to listen and assist. So, let's chat and find the help you need!
+        st.sidebar.markdown("""
+        <div style="font-family: 'Arial', sans-serif; font-size: 20px; font-style: bold;">
+            Appointment Booking Section
+        </div>
+    """, unsafe_allow_html=True)
 
     if option == "Chat":
         if (st.session_state.is_logged_in and st.session_state.user_type == "Patient") or (st.session_state.is_logged_in and st.session_state.user_type == "Admin"):
