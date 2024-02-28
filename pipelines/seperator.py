@@ -1,9 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
-
-def get_max_workers():
-    with ThreadPoolExecutor() as executor:
-        max_workers = executor._max_workers
-    return max_workers
-
-max_workers = get_max_workers()
-print(f"Maximum number of workers: {max_workers}")
+import pandas as pd
+from pathlib import Path
+result=pd.read_excel(Path('C:/Users/abhis/Desktop/Fake_Therapist.xlsx'))
+result.to_csv('Fake_Therapist1.csv',index=False, sep='$',header=True)
