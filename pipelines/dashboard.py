@@ -99,48 +99,6 @@ fig = go.Figure([go.Bar(x=patients_count['SPECIALIZATION'], y=patients_count['NO
 fig.update_layout(title='Number of Patients for Selected Specializations', xaxis_title='Specialization', yaxis_title='Number of Patients')
 st.plotly_chart(fig)
 
-
-import plotly.express as px
-
-# Add a dropdown for selecting specializations
-selected_specializations = st.multiselect('Filter by Specialization', therapists_df['SPECIALIZATION'].unique())
-
-# Filter the dataframe based on selected specializations
-filtered_therapists = therapists_df[therapists_df['SPECIALIZATION'].isin(selected_specializations)]
-filtered_appointments = appointments_df[appointments_df['THERAPIST_ID'].isin(filtered_therapists['THERAPIST_ID'])]
-
-# Aggregate the filtered data
-patients_per_therapist_filtered = filtered_appointments.groupby('THERAPIST_ID')['NO_OF_PATIENTS'].sum().reset_index()
-
-# Create an interactive bar chart
-fig = px.bar(patients_per_therapist_filtered, x='THERAPIST_ID', y='NO_OF_PATIENTS',
-             title='Number of Patients per Therapist (Filtered by Specialization)',
-             labels={'THERAPIST_ID': 'Therapist ID', 'NO_OF_PATIENTS': 'Number of Patients'},
-             hover_data=['THERAPIST_ID', 'NO_OF_PATIENTS'])
-
-st.plotly_chart(fig)
-
-import plotly.figure_factory as ff
-import json
-
-# Sample data, replace this with the loop processing your actual data from therapists
-sample_availability = json.loads(therapists_df['AVAILABILITY'].iloc[0])  # This is just to simulate, use actual loop for all therapists
-
-# Transforming the availability into a list of dictionaries suitable for the Gantt chart
-availability_list = []
-for day, times in sample_availability.items():
-    for time in times:
-        # Convert time to a suitable format if necessary. Here we split and convert '09:00 AM' to 24-hour format for simplicity.
-        start_time = f"{day} {time}"
-        # Assuming each slot is one hour for simplicity; adjust according to your actual slot length.
-        end_time = f"{day} {str(int(time.split(':')[0]) + 1) + ':00'}"
-        availability_list.append(dict(Task="Availability", Start=start_time, Finish=end_time, Resource="Dr. John Smith"))
-
-# Creating the Gantt chart
-fig = ff.create_gantt(availability_list, index_col='Resource', show_colorbar=True, group_tasks=True, title='Therapist Weekly Availability')
-st.plotly_chart(fig)
-
-
 import streamlit as st
 import pandas as pd
 import json
