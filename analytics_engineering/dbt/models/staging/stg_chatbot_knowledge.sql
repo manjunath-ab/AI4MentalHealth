@@ -11,4 +11,4 @@ with source as
   
 )
 
-select * from source
+select * from stg_chatbot_knowledge
