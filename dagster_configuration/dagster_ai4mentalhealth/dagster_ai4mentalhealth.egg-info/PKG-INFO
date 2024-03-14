@@ -8,6 +8,7 @@ Requires-Dist: langchain-openai
 Requires-Dist: langchain-community
 Requires-Dist: langchain
 Requires-Dist: selenium
+Requires-Dist: snowflake-connector-python
 Provides-Extra: dev
 Requires-Dist: dagster-webserver; extra == "dev"
 Requires-Dist: pytest; extra == "dev"

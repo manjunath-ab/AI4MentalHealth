@@ -25,6 +25,7 @@ from dagster_ai4mentalhealth.python_to_snowflake import create_snowflake_conn,up
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 dotenv_path = Path('c:/Users/abhis/.env')
+#dotenv_path = Path('/home/abhi/.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 llm = ChatOpenAI(temperature=random.random(), model='gpt-3.5-turbo-0125')

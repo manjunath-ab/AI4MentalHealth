@@ -40,6 +40,7 @@ chrome_options.add_argument("--allow-running-insecure-content")
 chrome_options.add_argument('--disable-dev-shm-usage')
 
 dotenv_path = Path('c:/Users/abhis/.env')
+#dotenv_path = Path('/home/abhi/.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 llm = ChatOpenAI(temperature=random.random(), model='gpt-3.5-turbo-0125')
