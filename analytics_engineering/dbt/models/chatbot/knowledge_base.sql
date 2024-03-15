@@ -9,3 +9,4 @@ union
 select * from {{ref("transform_chipur")}}
 union
 select * from {{ref("transform_nat")}}
+jdjd
