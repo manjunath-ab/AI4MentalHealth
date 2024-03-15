@@ -8,7 +8,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 # Load environment variables from .env file
 #dotenv_path = Path('/home/abhi/.env')
-dotenv_path = Path('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env')
+dotenv_path = Path('/Users/abhis/.env')
 
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -16,7 +16,7 @@ snowflake_account = os.getenv('SNOWFLAKE_ACCOUNT')
 snowflake_user = os.getenv('SNOWFLAKE_USER')
 snowflake_password = os.getenv('SNOWFLAKE_PASSWORD')
 snowflake_database = os.getenv('SNOWFLAKE_DATABASE')
-snowflake_schema = os.getenv('SNOWFLAKE_SCHEMA')
+snowflake_schema = 'DBT_CHATBOT'
 snowflake_warehouse = os.getenv('SNOWFLAKE_WAREHOUSE')
 snowflake_role = os.getenv('SNOWFLAKE_ROLE')
 
@@ -41,7 +41,7 @@ def snowflake_loader(QUERY):
 
 
 def main():
-    QUERY = "select * from CHATBOT_KNOWLEDGE"
+    QUERY = "select * from KNOWLEDGE_BASE"
     QUERY1 = "select * from THERAPIST_DETAILS"
     docs = snowflake_loader(QUERY)
     docs1 = snowflake_loader(QUERY1)
