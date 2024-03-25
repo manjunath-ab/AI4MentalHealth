@@ -31,9 +31,15 @@ fake = Faker()
 today = datetime.datetime.now()
 from langchain.chains import create_extraction_chain
 from weekdate_converter import convert_to_iso8601
+import logging 
+import sys
+
 hours = (9, 18)   # open hours
 
-
+my_logger=logging.getLogger("__init__")
+stream_handler=logging.StreamHandler(sys.stdout)
+my_logger.addHandler(stream_handler)
+my_logger.setLevel(logging.INFO)
 def load_environment_variables():
     dotenv_path = Path('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env')
     load_dotenv(dotenv_path=dotenv_path)
@@ -45,7 +51,7 @@ def initialize_chat_and_db():
 
 def create_system_template():
     SYSTEM_TEMPLATE = """
-    Imagine you are a human friend, talk to the user like a friend who understands their problem and keep the reply short.End with a follow up question. 
+    Imagine you are a human friend, talk to the user like a friend who understands their problem and keep the reply short.Do not diagnose the patient.Do not include any nameEnd with a follow up question. 
     If the user asks you about therapists then provide details such as the therapist's name, location, and description.
     When the user asks to book an appointment, ask about preferences such as location and preferred timings for the appointment.After user input, ask a question to keep the conversation going.
     If the user question is not relevant to mental health or therapists details, don't make something up and just say "I don't know":
@@ -361,12 +367,18 @@ def main():
                       st.session_state.response=response
                       try:
                       
-                       send_email(st.session_state.email,st.session_state.date,st.session_state.response,st.session_state.date)
+                       send_email(st.session_state.email,date,st.session_state.response)
                        st.success(f"Appointment booked for {st.session_state.email}")
-                       creds=get_credentials()
+                       
+                       try:
+                           my_logger.info("Getting credentials")
+                           creds=get_credentials()
+                       except Exception as e:
+                            my_logger.error(f"An error occurred: {e}")
+                       
                        service = build("calendar", "v3", credentials=creds)
                        # Create a Google Calendar event
-                       create_event(service,st.session_state.email,'zenaidemo111@gmail.com',st.session_state.response)
+                       create_event(service,st.session_state.email,'zenaidemo111@gmail.com',st.session_state.response,st.session_state.date)
                       
                           #insert schema into snowflake
                        schema=define_schema()
