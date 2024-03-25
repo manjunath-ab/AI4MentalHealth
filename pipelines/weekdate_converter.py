@@ -21,9 +21,9 @@ def convert_to_iso8601(weekday_time):
     combined_datetime = datetime.combine(target_date, given_time)
 
     # Convert to ISO 8601 format with timezone offset
-    iso8601_formatted = combined_datetime.strftime('%Y-%m-%dT%H:%M:%S%z')
+    #iso8601_formatted = combined_datetime.strftime('%Y-%m-%dT%H:%M:%S%z')
 
-    return iso8601_formatted
+    return combined_datetime
 
 # Test the function
 #weekday_time = ('Friday', '09:00 AM')
