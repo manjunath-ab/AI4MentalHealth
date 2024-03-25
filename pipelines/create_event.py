@@ -4,6 +4,7 @@ from googleapiclient.discovery import build # Module for building API service ob
 from googleapiclient.errors import HttpError
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
+from datetime import datetime, timedelta
 
 import requests # Module for handling Google API HTTP errors
 # Define the access scope for the Google Calendar API
@@ -32,20 +33,20 @@ def get_credentials():
         # Return the obtained credentials
     return creds
 
-def create_event (service,patient_email,org_email,therapist_name):
+def create_event (service,patient_email,org_email,therapist_name,date_time):
     try:
         # Define the details of the event
         event=event = {
-    "summary": "My Python Event",
+    "summary": "Mental Health Presentation",
     "location": "Somewhere online",
     "description": f"Appointment with {therapist_name}",
     "colorId": 6,
     'start': {
-        'dateTime': '2024-02-29T09:00:00-05:00',  # Adjusted time for EST
+        'dateTime': date_time,  # Adjusted time for EST
         'timeZone': 'America/New_York'  # Changed to Eastern Time zone
     },
     'end': {
-        'dateTime': '2024-02-29T17:00:00-05:00',  # Adjusted time for EST
+        'dateTime': date_time+timedelta(hours=1),  # Adjusted time for EST
         'timeZone': 'America/New_York'  # Changed to Eastern Time zone
     },
     "recurrence": [
