@@ -64,9 +64,7 @@ def create_event (service,patient_email,org_email,therapist_name,date_time):
         'dateTime': (date_time+timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S%z'),  # Adjusted time for EST
         'timeZone': 'America/New_York'  # Changed to Eastern Time zone
     },
-    "recurrence": [
-        "RRULE:FREQ=DAILY;COUNT=3"
-    ],
+
     'attendees': [
         {'email': patient_email},
         {'email': org_email}
@@ -94,13 +92,14 @@ def main():
     
     given_datetime = datetime(2024, 2, 29, 17, 0, 0)
     create_event (service,"ssivaranjani2604@gmail.com","zenaidemo111@gmail.com","Dr.Abhishek Manjunath",given_datetime)
-'''
+
 creds = get_credentials()
     # Build the Google Calendar API service
 service = build("calendar", "v3", credentials=creds)
 print(service)
 from weekdate_converter import convert_to_iso8601
-weekday_time = ('Friday', '09:00 AM')
+weekday_time = ('Saturday', '09:00 AM')
 given_datetime = convert_to_iso8601(weekday_time)
 print(type(given_datetime))
 create_event (service,"abhishek.manjunath.1999@gmail.com","zenaidemo111@gmail.com","Dr.Abhishek Manjunath",given_datetime)
+'''
