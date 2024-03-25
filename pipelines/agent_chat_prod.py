@@ -30,6 +30,7 @@ from create_event import create_event,get_credentials,build
 fake = Faker()
 today = datetime.datetime.now()
 from langchain.chains import create_extraction_chain
+from weekdate_converter import convert_to_iso8601
 hours = (9, 18)   # open hours
 
 
@@ -300,7 +301,7 @@ def main():
     output_messages_key="output",
     history_messages_key="chat_history",
     )
-    display_avatar_image()
+    #display_avatar_image()
     initialize_session_state()
     response_container = st.container()
     container = st.container()
@@ -356,11 +357,11 @@ def main():
                   s_button = st.form_submit_button(label='Submit')
                   if s_button:
                       
-                      st.session_state.date=date
+                      st.session_state.date=convert_to_iso8601(date)
                       st.session_state.response=response
                       try:
                       
-                       send_email(st.session_state.email,st.session_state.date,st.session_state.response)
+                       send_email(st.session_state.email,st.session_state.date,st.session_state.response,st.session_state.date)
                        st.success(f"Appointment booked for {st.session_state.email}")
                        creds=get_credentials()
                        service = build("calendar", "v3", credentials=creds)
