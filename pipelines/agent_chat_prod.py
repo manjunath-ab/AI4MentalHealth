@@ -77,7 +77,7 @@ def initialize_session_state():
         st.session_state['history'] = []
 
     if 'generated' not in st.session_state:
-        st.session_state['generated'] = ["Hello ! I'm Zenny.Ask me about therapy, mental health, or anything you want to talk about "]
+        st.session_state['generated'] = ["Hello ! I'm Bruno. You can talk to me about anything related to mental health and therapy. How can I help you today?"]
 
     if 'past' not in st.session_state:
         st.session_state['past'] = ["Hey"]
@@ -316,7 +316,7 @@ def main():
     
     with container:
         with st.form(key='my_form', clear_on_submit=True):
-            user_input = st.text_input("Chat:", placeholder="Talk to ZEN.AI 👉", key='input')
+            user_input = st.text_input("Chat:", placeholder="Talk to Bruno 👉", key='input')
             submit_button = st.form_submit_button(label='Send')
             
             
