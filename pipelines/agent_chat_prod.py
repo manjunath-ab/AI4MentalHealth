@@ -33,6 +33,7 @@ from langchain.chains import create_extraction_chain
 from weekdate_converter import convert_to_iso8601
 import logging 
 import sys
+from langchain_core.messages import HumanMessage
 
 hours = (9, 18)   # open hours
 
@@ -46,8 +47,9 @@ def load_environment_variables():
 
 def initialize_chat_and_db():
     chat = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.2)
+    gpt_chat= ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0.2)
     db = Chroma(persist_directory="../new_knowledge_db",embedding_function=OpenAIEmbeddings())
-    return chat, db
+    return chat, gpt_chat,db
 
 def create_system_template():
     SYSTEM_TEMPLATE = """
@@ -81,6 +83,12 @@ def initialize_session_state():
 
     if 'past' not in st.session_state:
         st.session_state['past'] = ["Hey"]
+    
+    if 'gpt_generated' not in st.session_state:
+        st.session_state['gpt_generated'] = ["Hello ! this chat directly talks to ChatGPT"]
+
+    if 'gpt_past' not in st.session_state:
+        st.session_state['gpt_past'] = ["Hey"]
 
 
 
@@ -256,14 +264,15 @@ def extract(chat,content: str, schema: dict):
 
 
 def main():
-    load_environment_variables()
-    conn=create_snowflake_conn()
-    chat, db = initialize_chat_and_db()
+   load_environment_variables()
+  
+   conn=create_snowflake_conn()
+   chat,gpt_chat,db = initialize_chat_and_db()
     #question = "mental health and therapy"
-    global schedule
-    schedule = createSchedule()
-    retriever= create_retriever(db)
-    tools = [
+   global schedule
+   schedule = createSchedule()
+   retriever= create_retriever(db)
+   tools = [
     Tool(
         name = "today_date",
         func = lambda string: todayDate(),
@@ -284,8 +293,8 @@ def main():
         func = lambda string: scheduleTime(string),
         description="Use to schedule an appointment for a given date and time. The input to this tool should be a comma separated list of 2 strings: date and time in format: mm/dd/yy, hh:mm, convert date and time to these formats. For example, `12/31/23, 10:00` would be the input if for Dec 31'st 2023 at 10am",
         )]
-    tools.append(get_retriever_tool(retriever))
-    question_answering_prompt = ChatPromptTemplate.from_messages(
+   tools.append(get_retriever_tool(retriever))
+   question_answering_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
@@ -297,10 +306,10 @@ def main():
         MessagesPlaceholder(variable_name="agent_scratchpad"),
     ]
     )
-    agent = create_openai_tools_agent(chat, tools, question_answering_prompt)
-    agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
-    demo_ephemeral_chat_history = initialize_chat_history()
-    conversational_agent_executor = RunnableWithMessageHistory(
+   agent = create_openai_tools_agent(chat, tools, question_answering_prompt)
+   agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
+   demo_ephemeral_chat_history = initialize_chat_history()
+   conversational_agent_executor = RunnableWithMessageHistory(
     agent_executor,
     lambda session_id: demo_ephemeral_chat_history,
     input_messages_key="input",
@@ -308,8 +317,14 @@ def main():
     history_messages_key="chat_history",
     )
     #display_avatar_image()
-    initialize_session_state()
+   initialize_session_state()
+   RAG_Chat, ChatGPT= st.tabs(["RAG Chat","ChatGPT"])
+   
+   with RAG_Chat:
+    
+    
     response_container = st.container()
+    
     container = st.container()
     appointment_container = st.container()
     pattern_dr = r'Dr\. [A-Z][a-z]+ [A-Z][a-z]+'
@@ -330,6 +345,7 @@ def main():
                        {"configurable": {"session_id": "unused"}},
                         )
                 output = response['output']
+                
                 pattern_dr = r'Dr\. [A-Z][a-z]+ [A-Z][a-z]+'
                 pattern_a = r'\d{1,2}:\d{2}'
                 pattern_date=r'(\d{2}/\d{2}/\d{2})'
@@ -393,18 +409,6 @@ def main():
                       except Exception as e:
                         st.error(f"Appointment not booked, please try again later. {e}")
 
-
-                      
-                      
-                      
-
-                      
-
-    
-    
-
-                
-
     
     if st.session_state['generated']:
         with response_container:
@@ -424,7 +428,49 @@ def main():
         # Refresh the app
         st.experimental_rerun()
 
+   with ChatGPT:
+       #build a normal chatbot with chatgpt
+     gpt_response_container = st.container()
+    
+     gpt_container = st.container()
+     with gpt_container:
+        with st.form(key='gpt_form', clear_on_submit=True):
+            user_input = st.text_input("Chat:", placeholder="Talk to Chatgpt👉", key='gpt')
+            gpt_submit_button = st.form_submit_button(label='Send')
+            
+            
+            if gpt_submit_button and user_input:
+                st.success(f"User input: {user_input}")
+                output=gpt_chat.invoke(
+                  [
+                   HumanMessage(
+                   content=user_input,
+                     )
+                   ]
+                  ).to_json()
+                
+                
+                
+                #print(type(output))
+                #print(output['kwargs']['content'])
+                st.session_state['gpt_past'].append(user_input)
+                st.session_state['gpt_generated'].append(output['kwargs']['content'])
+     if st.session_state['gpt_generated']:
+        with gpt_response_container:
+            for i in range(len(st.session_state['gpt_generated'])):
+                message(st.session_state["gpt_past"][i], is_user=True, key=str(i) + '_gptuser', avatar_style="big-smile")
+                message(st.session_state["gpt_generated"][i], key=str(i)+'_gpt', avatar_style="thumbs")
+                continue
 
 
+     gpt_end_chat_button = st.button("End GPT Chat")
+
+
+     if gpt_end_chat_button:
+        # Refresh the app without clearing session state
+        st.session_state['gpt_past'] = []
+        st.session_state['gpt_generated'] = []
+        # Refresh the app
+        st.experimental_rerun()
 if __name__ == "__main__":
     main()
