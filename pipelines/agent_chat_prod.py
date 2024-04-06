@@ -6,7 +6,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.memory import ChatMessageHistory
+from langchain.memory import ConversationBufferMemory
 from typing import Dict
 from streamlit_chat import message
 from langchain.agents import AgentExecutor, create_openai_tools_agent
@@ -34,6 +34,7 @@ from weekdate_converter import convert_to_iso8601
 import logging 
 import sys
 from langchain_core.messages import HumanMessage
+from langchain.agents.agent_toolkits import create_conversational_retrieval_agent
 
 hours = (9, 18)   # open hours
 
@@ -42,7 +43,7 @@ stream_handler=logging.StreamHandler(sys.stdout)
 my_logger.addHandler(stream_handler)
 my_logger.setLevel(logging.INFO)
 def load_environment_variables():
-    dotenv_path = Path('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env')
+    dotenv_path = Path('C:/Users/abhis/.env')
     load_dotenv(dotenv_path=dotenv_path)
 
 def initialize_chat_and_db():
@@ -53,9 +54,8 @@ def initialize_chat_and_db():
 
 def create_system_template():
     SYSTEM_TEMPLATE = """
-    Imagine you are a human friend, talk to the user like a friend who understands their problem and keep the reply short.Do not diagnose the patient.Do not include any nameEnd with a follow up question. 
-    If the user asks you about therapists then provide details such as the therapist's name, location, and description.
-    When the user asks to book an appointment, ask about preferences such as location and preferred timings for the appointment.After user input, ask a question to keep the conversation going.
+    Imagine you are a human friend, talk to the user like a friend who understands their problem and keep the reply short.Do not diagnose the patient.Do not include any names and End with a follow up question unrelated to therapy to get more information on the user's mental state. 
+    * Do not bring up therapy if the user does not mention it.*
     If the user question is not relevant to mental health or therapists details, don't make something up and just say "I don't know":
 
     <context>
@@ -65,15 +65,16 @@ def create_system_template():
     return SYSTEM_TEMPLATE
 
 def create_retriever(db):
-    retriever = db.as_retriever(k=4)
+    retriever = db.as_retriever(k=10)
     
     return retriever
 
-
+"""
 def initialize_chat_history():
     demo_ephemeral_chat_history = ChatMessageHistory()
     return demo_ephemeral_chat_history
 
+"""
 def initialize_session_state():
     if 'history' not in st.session_state:
         st.session_state['history'] = []
@@ -89,6 +90,9 @@ def initialize_session_state():
 
     if 'gpt_past' not in st.session_state:
         st.session_state['gpt_past'] = ["Hey"]
+
+    if 'chat_history' not in st.session_state:
+        st.session_state['chat_history'] = ConversationBufferMemory()
 
 
 
@@ -114,7 +118,7 @@ def get_retriever_tool(retriever):
     tool = create_retriever_tool(
     retriever,
     "mental_health_and_therapist_knowledge_base",
-    "This is a retreiver tool for therapist details and mental health journies,coping mechanisms,triggers, self care rountines and more",
+    "This is a retreiver tool for which has information on the coping mechanisms,triggers, self-care routines, support systems of people dealing with anxiety,depression and bi polar disorder. It also contains therapist details ",
     )
     return tool
 
@@ -308,7 +312,9 @@ def main():
     )
    agent = create_openai_tools_agent(chat, tools, question_answering_prompt)
    agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
-   demo_ephemeral_chat_history = initialize_chat_history()
+   #agent_executor = create_conversational_retrieval_agent(chat, tools,system_message=question_answering_prompt,verbose=False)
+   
+   demo_ephemeral_chat_history= ConversationBufferMemory()
    conversational_agent_executor = RunnableWithMessageHistory(
     agent_executor,
     lambda session_id: demo_ephemeral_chat_history,
@@ -337,13 +343,19 @@ def main():
             
             if submit_button and user_input:
                 st.success(f"User input: {user_input}")
-                demo_ephemeral_chat_history.add_user_message(user_input)
                 
               
-                response=conversational_agent_executor.invoke(
-                       {"input": user_input},
+                response=agent_executor.invoke(
+                       {"input": user_input,
+                        "chat_history": st.session_state['chat_history'].chat_memory.messages
+                        },
+                       
                        {"configurable": {"session_id": "unused"}},
                         )
+                #add both Human and AI messages to the chat history
+                st.session_state['chat_history'].chat_memory.add_user_message(user_input)
+                st.session_state['chat_history'].chat_memory.add_ai_message(response['output'])
+                
                 output = response['output']
                 
                 pattern_dr = r'Dr\. [A-Z][a-z]+ [A-Z][a-z]+'
@@ -472,5 +484,7 @@ def main():
         st.session_state['gpt_generated'] = []
         # Refresh the app
         st.experimental_rerun()
+
+
 if __name__ == "__main__":
     main()
