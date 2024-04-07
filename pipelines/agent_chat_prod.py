@@ -311,8 +311,8 @@ def main():
     ]
     )
    agent = create_openai_tools_agent(chat, tools, question_answering_prompt)
-   agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
-   #agent_executor = create_conversational_retrieval_agent(chat, tools,system_message=question_answering_prompt,verbose=False)
+   #agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
+   agent_executor = create_conversational_retrieval_agent(chat, tools,system_message=question_answering_prompt,verbose=True)
    
    demo_ephemeral_chat_history= ConversationBufferMemory()
    conversational_agent_executor = RunnableWithMessageHistory(
