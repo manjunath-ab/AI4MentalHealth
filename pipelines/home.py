@@ -23,6 +23,7 @@ st.markdown(
 # from  login import login, sign_up
 import login
 import agent_chat_prod
+import cohere_ranker
 import therapy
 import dashboard
 
@@ -34,10 +35,10 @@ def main():
 
 
     option = st.sidebar.selectbox("Menu", ["Chat", "Sign Up", "Login","Therapist View","Admin Dashboard"])
-    st.image("ai4mh.jpeg", width=300)
+    st.image("dog2.jpeg", width=300)
 
     # Upload an image on the sidebar
-    avatar_image = "dog2.jpeg"
+    avatar_image = "ai4mh.jpeg"
     
     # Check if an image file is uploaded
     if avatar_image is not None:
@@ -51,7 +52,7 @@ def main():
 
     if option == "Chat":
         if (st.session_state.is_logged_in and st.session_state.user_type == "Patient") or (st.session_state.is_logged_in and st.session_state.user_type == "Admin"):
-            agent_chat_prod.main()
+            cohere_ranker.main()
         else:
             st.write("""<div style="background-color: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 5px;">
                         <h3>Please log in as a patient to access the chat.</h3>
