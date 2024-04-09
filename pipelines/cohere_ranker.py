@@ -57,7 +57,7 @@ def initialize_chat_and_db():
 #If the user question is not relevant to mental health or therapists details or details of the user, don't make something up and just say "I don't know":
 def create_system_template():
     SYSTEM_TEMPLATE = """
-    Imagine you are a human friend,remember their name and  talk to the user like a friend who understands their problem and keep the reply short.Do not diagnose the patient, End with a follow up question unrelated to therapy to get more information on the user's mental state. 
+    Imagine you are a human friend,remember their name and  talk to the user like a friend who understands their problem and keep the reply short.Do not diagnose the patient. Ask the user if they need suggestions on coping mechanisms, self care practices and support systems used by other people for similar mental health issue.End with a follow up question unrelated to therapy to get more information on the user's mental state. 
     * Do not bring up therapy if the user does not mention it.*
     If the user question is not relevant to mental health or therapists details or details of the user, don't make something up and just say "I don't know":
 
