@@ -37,7 +37,8 @@ from langchain_core.messages import HumanMessage
 from langchain.agents.agent_toolkits import create_conversational_retrieval_agent
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_cohere import CohereRerank
-
+from langchain_community.llms import Cohere
+from langchain_core.runnables import RunnablePassthrough
 hours = (9, 18)   # open hours
 
 my_logger=logging.getLogger("__init__")
@@ -51,8 +52,9 @@ def load_environment_variables():
 def initialize_chat_and_db():
     chat = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.2)
     gpt_chat= ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0.2)
+    cohere_chat= Cohere(temperature=0)
     db = Chroma(persist_directory="../new_knowledge_db",embedding_function=OpenAIEmbeddings())
-    return chat, gpt_chat,db
+    return chat, gpt_chat,cohere_chat,db
 
 #If the user question is not relevant to mental health or therapists details or details of the user, don't make something up and just say "I don't know":
 def create_system_template():
@@ -67,9 +69,22 @@ def create_system_template():
     """
     return SYSTEM_TEMPLATE
 
+def create_cohere_system_template():
+    SYSTEM_TEMPLATE = """
+    Imagine you are a human friend, talk to the user like a friend who understands their problem and keep the reply short.End with a follow up question. 
+    If the user asks you about therapists then provide details such as the therapist's name, location, and description.
+    When the user asks to book an appointment, ask about preferences such as location and preferred timings for the appointment.After user input, ask a question to keep the conversation going.
+    If the user question is not relevant to mental health or therapists details, don't make something up and just say "I don't know":
+
+    <context>
+    {context}
+    </context>
+    """
+    return SYSTEM_TEMPLATE
+
 def create_retriever(db):
-    retriever = db.as_retriever(k=10)
-    compressor = CohereRerank()
+    retriever = db.as_retriever(k=25)
+    compressor = CohereRerank(top_n=10)
     compression_retriever = ContextualCompressionRetriever(
     base_compressor=compressor, base_retriever=retriever
     )
@@ -100,6 +115,14 @@ def initialize_session_state():
 
     if 'chat_history' not in st.session_state:
         st.session_state['chat_history'] = ConversationBufferMemory()
+
+    if 'cohere_generated' not in st.session_state:
+        st.session_state['cohere_generated'] = ["Hello ! this chat directly talks to Cohere"]
+    if 'cohere_past' not in st.session_state:
+        st.session_state['cohere_past'] = ["Hey"]
+
+    if 'cohere_chat_history' not in st.session_state:
+        st.session_state['cohere_chat_history'] = ConversationBufferMemory()
 
 
 
@@ -272,13 +295,31 @@ def extract(chat,content: str, schema: dict):
     )
     return create_extraction_chain(schema=schema, llm=chat).invoke(prompt+content)
 
+def parse_retriever_input(params: Dict):
+    print(params)
+    return params["messages"][-1].content
 
+def create_document_chain(chat, question_answering_prompt):
+    document_chain = create_stuff_documents_chain(chat, question_answering_prompt)
+    return document_chain
+
+def create_cohere_question_answering_prompt():
+    question_answering_prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                create_cohere_system_template(),
+            ),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
+    return question_answering_prompt
 
 def main():
    load_environment_variables()
   
    conn=create_snowflake_conn()
-   chat,gpt_chat,db = initialize_chat_and_db()
+   chat,gpt_chat,cohere_chat,db = initialize_chat_and_db()
     #question = "mental health and therapy"
    global schedule
    schedule = createSchedule()
@@ -317,8 +358,11 @@ def main():
         MessagesPlaceholder(variable_name="agent_scratchpad"),
     ]
     )
+   cohere_prompt=create_cohere_question_answering_prompt()
    agent = create_openai_tools_agent(chat, tools, question_answering_prompt)
    agent_executor = AgentExecutor(agent=agent,tools=tools, verbose=True)
+   cohere_document_chain = create_document_chain(cohere_chat, cohere_prompt)
+   
    #agent_executor = create_conversational_retrieval_agent(chat, tools,system_message=question_answering_prompt,verbose=True)
    
    demo_ephemeral_chat_history= ConversationBufferMemory()
@@ -331,9 +375,9 @@ def main():
     )
     #display_avatar_image()
    initialize_session_state()
-   RAG_Chat, ChatGPT= st.tabs(["RAG Chat","ChatGPT"])
+   RAG_GPT_Chat, ChatGPT,RAG_COHERE_CHAT= st.tabs(["RAG GPTChat","ChatGPT", "RAG CohereChat"])
    
-   with RAG_Chat:
+   with RAG_GPT_Chat:
     
     
     response_container = st.container()
@@ -494,6 +538,71 @@ def main():
         # Refresh the app without clearing session state
         st.session_state['gpt_past'] = []
         st.session_state['gpt_generated'] = []
+        # Refresh the app
+        st.experimental_rerun()
+
+   with RAG_COHERE_CHAT:
+    
+    
+    response_container = st.container()
+    
+    container = st.container()
+    
+    with container:
+        with st.form(key='my_cohere_form', clear_on_submit=True):
+            user_input = st.text_input("Chat:", placeholder="Talk to Cohere 👉", key='cohere_input')
+            submit_button = st.form_submit_button(label='Send')
+            
+            
+            if submit_button and user_input:
+                st.success(f"User input: {user_input}")
+                st.session_state['cohere_chat_history'].chat_memory.add_user_message(user_input)
+                cohere_document_chain.invoke(
+                    {
+                        "messages": st.session_state['cohere_chat_history'].chat_memory.messages,
+                        "context": retriever.invoke(user_input),
+                    }
+                )
+                print(retriever.invoke(user_input))
+                retrieval_chain = RunnablePassthrough.assign(
+                    context=parse_retriever_input | retriever,
+                ).assign(
+                    answer=cohere_document_chain,
+                )
+                response = retrieval_chain.invoke(
+                    {
+                        "messages": st.session_state['cohere_chat_history'].chat_memory.messages,
+                    },
+                )
+                output = response['answer']
+              
+                #add both Human and AI messages to the chat history
+                
+                st.session_state['cohere_chat_history'].chat_memory.add_ai_message(output)
+                print(st.session_state['cohere_chat_history'].chat_memory.messages)
+                
+                
+
+                st.session_state['cohere_past'].append(user_input)
+                st.session_state['cohere_generated'].append(output)
+                
+
+    
+    if st.session_state['cohere_generated']:
+        with response_container:
+            for i in range(len(st.session_state['cohere_generated'])):
+                message(st.session_state["cohere_past"][i], is_user=True, key=str(i) + '_cohereuser', avatar_style="big-smile")
+                message(st.session_state["cohere_generated"][i], key=str(i)+'_cohere', avatar_style="thumbs")
+                continue
+
+
+    cohere_end_chat_button = st.button("End Cohere Chat")
+
+
+    if cohere_end_chat_button:
+        # Refresh the app without clearing session state
+        st.session_state['cohere_past'] = []
+        st.session_state['cohere_generated'] = []
         # Refresh the app
         st.experimental_rerun()
 
