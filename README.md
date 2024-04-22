@@ -10,7 +10,7 @@ Please use this application responsibly, as we have limited free credits remaini
 
 ## Abstract 📝
 
-## Project Goals 🎯
+## Project Flow 🎯
 
 1. Scrape mental health related data from various blog sites using Selenium with Dagster Orchestration tool. 🕷️
 2. Clean and categorize the scraped data using OpenAIExtractionChain, then store it into a Snowflake database along with associated metadata. 🧹
