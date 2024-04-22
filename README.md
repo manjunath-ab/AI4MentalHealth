@@ -10,12 +10,6 @@ Please use this application responsibly, as we have limited free credits remaini
 
 ## Meet Bruno
 
-<p align="center">
-  <img src="![image](https://github.com/manjunath-ab/AI4MentalHealth/assets/114537365/b866fcbb-29c8-4103-9f3e-8c0388f54d4d)
-" alt="Bruno" width="300">
-</p>
-
-
 ![image](https://github.com/manjunath-ab/AI4MentalHealth/assets/114537365/07fe09b9-f688-4bfd-b893-9b139d48ecee)
 
 Bruno is our friendly chatbot, designed to provide a supportive and non-judgmental space for users seeking mental health support and information.
