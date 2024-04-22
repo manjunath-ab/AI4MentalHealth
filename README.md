@@ -2,7 +2,7 @@
 
 ## Live Application Links 🌐
 
-- Please use this application responsibly, as we have limited free credits remaining.
+Please use this application responsibly, as we have limited free credits remaining.
 
 [![Codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=1blarGD_LQ5o5aGcJWiKKbhDBissQSL9qfs28dx5HyFk#11)
 
@@ -16,6 +16,7 @@
 2. Clean and categorize the scraped data using OpenAIExtractionChain, then store it into a Snowflake database along with associated metadata. 🧹
 3. Use dbt to run transformations on the scraped data. 🔧
 4. Embed the transformed data using OpenAI embeddings and store it into ChromaDB for efficient similarity search. 🔍
+
 5.
 
 ## Use Case 📖
@@ -59,6 +60,7 @@ The use case for this project is to develop a mental health platform that levera
 
 9. **Evaluation**: The chatbot's responses are evaluated using DeepEval from ConfidentAI, which calculates Hallucination, Bias, Answer Relevancy, and Toxicity scores. This helps assess the quality and safety of the chatbot's outputs.
 
+10. **Dashboard**: Business Analytics dashboard is built which gives the admin a wholesome view of the number of appoitnments made, therapist availability, number of specialisations, etc.
 
 ## Project Tree 
 
@@ -281,7 +283,7 @@ git clone https://github.com/your-repo/mental-health-chat.git
 pip install -r requirements.txt
 ```
 
-3. Set up the necessary environment variables (e.g., API keys, database credentials, etc.)
+3. Set up the necessary environment variables (e.g., OpenAI API keys, Google Calendar API key, Snowflake database credentials, Cohere API key)
 
 4. Run the Streamlit app:
 ``` bash
