@@ -67,6 +67,314 @@ The use case for this project is to develop a mental health platform that levera
 
 8. **Data Storage**: User chat history and relevant information, including scheduled appointments, are stored in a Snowflake database for future reference and analysis.
 
+
+## Project Tree 
+
+```
+📦 
+├─ .gitignore
+├─ LICENSE
+├─ README.md
+├─ analytics_engineering
+│  └─ dbt
+│     ├─ .gitignore
+│     ├─ .gitkeep
+│     ├─ README.md
+│     ├─ analyses
+│     │  └─ .gitkeep
+│     ├─ dbt_project.yml
+│     ├─ macros
+│     │  └─ .gitkeep
+│     ├─ models
+│     │  ├─ chatbot
+│     │  │  ├─ knowledge_base.sql
+│     │  │  ├─ schema.yml
+│     │  │  ├─ transform_blurt.sql
+│     │  │  ├─ transform_chipur.sql
+│     │  │  └─ transform_nat.sql
+│     │  ├─ example
+│     │  │  ├─ my_first_dbt_model.sql
+│     │  │  ├─ my_second_dbt_model.sql
+│     │  │  └─ schema.yml
+│     │  └─ staging
+│     │     ├─ schema.yml
+│     │     └─ stg_chatbot_knowledge.sql
+│     ├─ seeds
+│     │  └─ .gitkeep
+│     └─ snapshots
+│        └─ .gitkeep
+├─ chat_eval.json
+├─ dagster_configuration
+│  └─ dagster_ai4mentalhealth
+│     ├─ README.md
+│     ├─ dagster_ai4mentalhealth.egg-info
+│     │  ├─ PKG-INFO
+│     │  ├─ SOURCES.txt
+│     │  ├─ dependency_links.txt
+│     │  ├─ requires.txt
+│     │  └─ top_level.txt
+│     ├─ dagster_ai4mentalhealth
+│     │  ├─ __init__.py
+│     │  ├─ blurt.py
+│     │  ├─ chipur.py
+│     │  ├─ nat.py
+│     │  └─ python_to_snowflake.py
+│     ├─ dagster_ai4mentalhealth_tests
+│     │  ├─ __init__.py
+│     │  └─ test_assets.py
+│     ├─ pyproject.toml
+│     ├─ setup.cfg
+│     ├─ setup.py
+│     ├─ tmp1oiwfd6j
+│     │  ├─ history
+│     │  │  ├─ runs.db
+│     │  │  └─ runs
+│     │  │     ├─ 315d980b-5792-4129-8386-b564cc6a8a96.db
+│     │  │     └─ index.db
+│     │  ├─ schedules
+│     │  │  └─ schedules.db
+│     │  └─ storage
+│     │     ├─ 315d980b-5792-4129-8386-b564cc6a8a96
+│     │     │  └─ compute_logs
+│     │     │     ├─ cihempzk.complete
+│     │     │     ├─ cihempzk.err
+│     │     │     ├─ cihempzk.out
+│     │     │     ├─ jekhafeb.complete
+│     │     │     ├─ jekhafeb.err
+│     │     │     ├─ jekhafeb.out
+│     │     │     ├─ kvamskng.complete
+│     │     │     ├─ kvamskng.err
+│     │     │     ├─ kvamskng.out
+│     │     │     ├─ kyymtjgo.complete
+│     │     │     ├─ kyymtjgo.err
+│     │     │     ├─ kyymtjgo.out
+│     │     │     ├─ pjfvwcnu.complete
+│     │     │     ├─ pjfvwcnu.err
+│     │     │     ├─ pjfvwcnu.out
+│     │     │     ├─ rlgwvsiv.complete
+│     │     │     ├─ rlgwvsiv.err
+│     │     │     ├─ rlgwvsiv.out
+│     │     │     ├─ zmyhrqbc.complete
+│     │     │     ├─ zmyhrqbc.err
+│     │     │     └─ zmyhrqbc.out
+│     │     ├─ create_df
+│     │     ├─ create_snowflake_conn
+│     │     ├─ define_schema
+│     │     ├─ extracted_url_list
+│     │     ├─ html_scrape
+│     │     ├─ publish_to_snowflake
+│     │     └─ threaded_url_list_pull
+│     ├─ tmp4oprin6e
+│     │  ├─ history
+│     │  │  ├─ runs.db
+│     │  │  └─ runs
+│     │  │     └─ index.db
+│     │  └─ schedules
+│     │     └─ schedules.db
+│     ├─ tmp5zgffo06
+│     │  ├─ history
+│     │  │  ├─ runs.db
+│     │  │  └─ runs
+│     │  │     ├─ 71f98b34-2b0c-4a64-b7d9-fec9ceca0704.db
+│     │  │     └─ index.db
+│     │  ├─ schedules
+│     │  │  └─ schedules.db
+│     │  └─ storage
+│     │     ├─ 71f98b34-2b0c-4a64-b7d9-fec9ceca0704
+│     │     │  └─ compute_logs
+│     │     │     ├─ assyxnzc.complete
+│     │     │     ├─ assyxnzc.err
+│     │     │     ├─ assyxnzc.out
+│     │     │     ├─ gczmihta.complete
+│     │     │     ├─ gczmihta.err
+│     │     │     ├─ gczmihta.out
+│     │     │     ├─ jhensmgr.complete
+│     │     │     ├─ jhensmgr.err
+│     │     │     ├─ jhensmgr.out
+│     │     │     ├─ kqbjwufs.complete
+│     │     │     ├─ kqbjwufs.err
+│     │     │     ├─ kqbjwufs.out
+│     │     │     ├─ wcpiegeh.complete
+│     │     │     ├─ wcpiegeh.err
+│     │     │     ├─ wcpiegeh.out
+│     │     │     ├─ ykarsvdk.complete
+│     │     │     ├─ ykarsvdk.err
+│     │     │     └─ ykarsvdk.out
+│     │     ├─ c_create_df
+│     │     ├─ c_define_schema
+│     │     ├─ c_extracted_url_list
+│     │     ├─ c_html_scrape
+│     │     ├─ c_publish_to_snowflake
+│     │     └─ c_threaded_url_list_pull
+│     ├─ tmp_5_c6a03
+│     │  ├─ history
+│     │  │  ├─ runs.db
+│     │  │  └─ runs
+│     │  │     └─ index.db
+│     │  ├─ schedules
+│     │  │  └─ schedules.db
+│     │  └─ storage
+│     │     ├─ bf300faf-df0d-4ced-81f9-1645d0412023
+│     │     │  └─ compute_logs
+│     │     │     ├─ gzvjsxcm.err
+│     │     │     ├─ gzvjsxcm.out
+│     │     │     ├─ wazbeazq.complete
+│     │     │     ├─ wazbeazq.err
+│     │     │     └─ wazbeazq.out
+│     │     ├─ extracted_url_list
+│     │     └─ threaded_url_list_pull
+│     ├─ tmp__x0mslm
+│     │  ├─ history
+│     │  │  ├─ runs.db
+│     │  │  └─ runs
+│     │  │     └─ index.db
+│     │  └─ schedules
+│     │     └─ schedules.db
+│     ├─ tmpeqygq9vi
+│     │  └─ storage
+│     │     ├─ 06284fc5-5422-4d91-95d4-200c91fa16b5
+│     │     │  └─ compute_logs
+│     │     │     ├─ indvtkge.err
+│     │     │     ├─ indvtkge.out
+│     │     │     ├─ mfzpihln.complete
+│     │     │     ├─ mfzpihln.err
+│     │     │     └─ mfzpihln.out
+│     │     └─ define_schema
+│     ├─ tmpmd6354j2
+│     │  └─ storage
+│     │     ├─ 2e7f04c5-7f65-4329-acfb-83eee38a61b7
+│     │     │  └─ compute_logs
+│     │     │     ├─ nuiizpkn.err
+│     │     │     ├─ nuiizpkn.out
+│     │     │     ├─ saxmmcih.complete
+│     │     │     ├─ saxmmcih.err
+│     │     │     ├─ saxmmcih.out
+│     │     │     ├─ zhkrfldr.complete
+│     │     │     ├─ zhkrfldr.err
+│     │     │     └─ zhkrfldr.out
+│     │     ├─ n_define_schema
+│     │     ├─ n_extracted_url_list
+│     │     └─ n_threaded_url_list_pull
+│     └─ tmppterspc2
+│        ├─ history
+│        │  ├─ runs.db
+│        │  └─ runs
+│        │     ├─ 2cbedd3a-ed51-455b-b972-da90485c60ca.db
+│        │     ├─ b29d93e0-f0b2-4aec-a62c-bc55dafe1fc5.db
+│        │     └─ index.db
+│        ├─ schedules
+│        │  └─ schedules.db
+│        └─ storage
+│           ├─ 2cbedd3a-ed51-455b-b972-da90485c60ca
+│           │  └─ compute_logs
+│           │     ├─ awzgvxcy.complete
+│           │     ├─ awzgvxcy.err
+│           │     ├─ awzgvxcy.out
+│           │     ├─ dbubvzjg.complete
+│           │     ├─ dbubvzjg.err
+│           │     ├─ dbubvzjg.out
+│           │     ├─ hnsovkzn.complete
+│           │     ├─ hnsovkzn.err
+│           │     ├─ hnsovkzn.out
+│           │     ├─ trcivbsr.complete
+│           │     ├─ trcivbsr.err
+│           │     ├─ trcivbsr.out
+│           │     ├─ vujbxtqf.complete
+│           │     ├─ vujbxtqf.err
+│           │     ├─ vujbxtqf.out
+│           │     ├─ wqirqdsv.complete
+│           │     ├─ wqirqdsv.err
+│           │     └─ wqirqdsv.out
+│           ├─ b29d93e0-f0b2-4aec-a62c-bc55dafe1fc5
+│           │  └─ compute_logs
+│           │     ├─ gvkvsosw.complete
+│           │     ├─ gvkvsosw.err
+│           │     ├─ gvkvsosw.out
+│           │     ├─ kwaateim.complete
+│           │     ├─ kwaateim.err
+│           │     ├─ kwaateim.out
+│           │     ├─ nqiukgrx.complete
+│           │     ├─ nqiukgrx.err
+│           │     ├─ nqiukgrx.out
+│           │     ├─ ooxaypou.complete
+│           │     ├─ ooxaypou.err
+│           │     ├─ ooxaypou.out
+│           │     ├─ ubqspgqc.complete
+│           │     ├─ ubqspgqc.err
+│           │     ├─ ubqspgqc.out
+│           │     ├─ wcvgjmha.complete
+│           │     ├─ wcvgjmha.err
+│           │     └─ wcvgjmha.out
+│           ├─ c_create_df
+│           ├─ c_define_schema
+│           ├─ c_extracted_url_list
+│           ├─ c_html_scrape
+│           ├─ c_publish_to_snowflake
+│           ├─ c_threaded_url_list_pull
+│           ├─ n_create_df
+│           ├─ n_define_schema
+│           ├─ n_extracted_url_list
+│           ├─ n_html_scrape
+│           ├─ n_publish_to_snowflake
+│           └─ n_threaded_url_list_pull
+├─ new_knowledge_db
+│  ├─ 89207a28-d694-4681-b72d-a6a21b882f04
+│  │  ├─ data_level0.bin
+│  │  ├─ header.bin
+│  │  ├─ index_metadata.pickle
+│  │  ├─ length.bin
+│  │  └─ link_lists.bin
+│  └─ chroma.sqlite3
+├─ pipelines
+│  ├─ .DS_Store
+│  ├─ CREDENTIALS
+│  │  ├─ credentials.json
+│  │  └─ token.json
+│  ├─ README.md
+│  ├─ __pycache__
+│  │  └─ python_to_snowflake.cpython-311.pyc
+│  ├─ agent_chat.py
+│  ├─ agent_chat_prod.py
+│  ├─ ai4mh.jpeg
+│  ├─ bipolar.py
+│  ├─ blurt_etl.py
+│  ├─ calendar_api.py
+│  ├─ chatbot.py
+│  ├─ chatbot_dev.py
+│  ├─ cohere_ranker.py
+│  ├─ create_event.py
+│  ├─ dashboard.py
+│  ├─ dog2.jpeg
+│  ├─ email_patient.py
+│  ├─ embeddings.py
+│  ├─ home.py
+│  ├─ login.py
+│  ├─ python_to_snowflake.py
+│  ├─ scheduler.py
+│  ├─ seperator.py
+│  ├─ signup.py
+│  ├─ snowflake-embedded.py
+│  ├─ snowflake_embedding.py
+│  ├─ snowflake_integrator.py
+│  ├─ staging_files
+│  │  ├─ .DS_Store
+│  │  ├─ CREDENTIALS
+│  │  │  ├─ credentials.json
+│  │  │  └─ token.json
+│  │  ├─ calendar_api.py
+│  │  ├─ create_event.py
+│  │  ├─ test.py
+│  │  └─ token.json
+│  ├─ therapy.py
+│  ├─ token.json
+│  └─ weekdate_converter.py
+├─ schedule.json
+├─ test_1.py
+└─ test_evaluation.py
+```
+©generated by [Project Tree Generator](https://woochanleee.github.io/project-tree-generator)
+
+
 ## Installation
 
 1. Clone the repository:
