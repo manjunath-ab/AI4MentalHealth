@@ -41,10 +41,45 @@ The use case for this project is to develop a mental health platform that levera
 
 ## Data Source 📚
 
-[Chipur](https://chipur.com)
+1. [Chipur](https://chipur.com)
 
 
-[Blurt](https://blurt.blog)
+2. [Blurt](https://blurt.blog)
 
 
-[NatashaTracy](https://natashatracy.com)
+3. [NatashaTracy](https://natashatracy.com)
+4. 
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-repo/mental-health-chat.git
+```
+
+2. Install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Set up the necessary environment variables (e.g., API keys, database credentials, etc.)
+
+4. Run the Streamlit app:
+``` bash
+streamlit run app.py
+```
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them with descriptive commit messages.
+4. Push your changes to your forked repository.
+5. Submit a pull request.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
