@@ -48,7 +48,25 @@ The use case for this project is to develop a mental health platform that levera
 
 
 3. [NatashaTracy](https://natashatracy.com)
-4. 
+
+## Steps
+
+1. **Knowledge Base Preparation**: The chatbot's knowledge base is populated with mental health-related information from various sources, such as blogs and websites. This data is scraped, cleaned, and processed using techniques like OpenAI's extraction chain.
+
+2. **Embedding and Storage**: The processed knowledge chunks are embedded using OpenAI's text embedding model, and the resulting vectors are stored in a ChromaDB vector database for efficient similarity search.
+
+3. **User Input and Knowledge Retrieval**: When a user enters a message in the chatbot interface, the message is embedded using the same OpenAI embedding model. The chatbot then queries the ChromaDB database to retrieve the most relevant knowledge chunks based on vector similarity.
+
+4. **Reranking**: The retrieved knowledge chunks are reranked using the Cohere reranker to improve their semantic relevance to the user's query.
+
+5. **Language Generation**: The reranked knowledge chunks and the user's input are passed to the OpenAI GPT-3.5 language model, which generates a contextual and empathetic response.
+
+6. **Conversation Management**: The generated response, along with the user's input, is added to the conversation history managed by LangChain's memory module. This conversation history is used to provide context for future responses.
+
+7. **Appointment Scheduling**: If the user requests to schedule an appointment, the chatbot prompts the user for available dates and times. Once confirmed, the chatbot creates a calendar event using the Google Calendar API and sends appointment details via email.
+
+8. **Data Storage**: User chat history and relevant information, including scheduled appointments, are stored in a Snowflake database for future reference and analysis.
+
 ## Installation
 
 1. Clone the repository:
