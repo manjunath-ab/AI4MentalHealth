@@ -42,5 +42,9 @@ The use case for this project is to develop a mental health platform that levera
 ## Data Source 📚
 
 [Chipur](https://chipur.com)
+
+
 [Blurt](https://blurt.blog)
+
+
 [NatashaTracy](https://natashatracy.com)
