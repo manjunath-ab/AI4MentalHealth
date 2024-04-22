@@ -20,7 +20,7 @@
 
 ## Use Case 📖
 
-The use case for this project is to develop a mental health platform that leverages conversation AI based on Retrieval-augmented generation (RAG) to offer users a supportive and non-judgmental space, fostering emotional well-being and personal introspection. 🧠💞
+The use case for this project is to develop a mental health platform that leverages conversation AI based on Retrieval-augmented generation (RAG) to offer users a supportive and non-judgmental space, fostering emotional well-being and personal introspection. 🧠
 
 ## Technologies Used 🛠️
 
