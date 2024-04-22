@@ -8,7 +8,24 @@ Please use this application responsibly, as we have limited free credits remaini
 
 [![Demo Link](https://img.shields.io/badge/Demo_Link-808080?style=for-the-badge&logo=YouTube&logoColor=white)](https://youtu.be/DnmAYNL0kcI)
 
-## Abstract 📝
+## Meet Bruno
+
+<p align="center">
+  <img src="![image](https://github.com/manjunath-ab/AI4MentalHealth/assets/114537365/b866fcbb-29c8-4103-9f3e-8c0388f54d4d)
+" alt="Bruno" width="300">
+</p>
+
+
+![image](https://github.com/manjunath-ab/AI4MentalHealth/assets/114537365/07fe09b9-f688-4bfd-b893-9b139d48ecee)
+
+Bruno is our friendly chatbot, designed to provide a supportive and non-judgmental space for users seeking mental health support and information.
+
+## Architecture
+
+![image](https://github.com/manjunath-ab/AI4MentalHealth/assets/114537365/c7f7a356-4a6b-42ae-9244-a51c7846a1f8)
+
+The above diagram illustrates the architecture of the Mental Health Chatbot, showcasing the various components and technologies used in the project.
+
 
 ## Project Flow 🎯
 
@@ -22,6 +39,8 @@ Please use this application responsibly, as we have limited free credits remaini
 ## Use Case 📖
 
 The use case for this project is to develop a mental health platform that leverages conversation AI based on Retrieval-augmented generation (RAG) to offer users a supportive and non-judgmental space, fostering emotional well-being and personal introspection. 🧠
+
+
 
 ## Technologies Used 🛠️
 
