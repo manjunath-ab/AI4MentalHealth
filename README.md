@@ -12,7 +12,7 @@
 
 ## Project Goals 🎯
 
-1. Scrape mental health related data from various blog sites like Blurt, Chipur, and Natashatracy.com using Selenium with Dagster Orchestration tool. 🕷️
+1. Scrape mental health related data from various blog sites using Selenium with Dagster Orchestration tool. 🕷️
 2. Clean and categorize the scraped data using OpenAIExtractionChain, then store it into a Snowflake database along with associated metadata. 🧹
 3. Use dbt to run transformations on the scraped data. 🔧
 4. Embed the transformed data using OpenAI embeddings and store it into ChromaDB for efficient similarity search. 🔍
@@ -39,16 +39,6 @@ The use case for this project is to develop a mental health platform that levera
 [![DeepEval](https://img.shields.io/badge/DeepEval-000000?style=for-the-badge&logo=deepeval&logoColor=white)](https://deepeval.com/)
 [![Google Calendar](https://img.shields.io/badge/Google_Calendar-4285F4?style=for-the-badge&logo=google-calendar&logoColor=white)](https://calendar.google.com/)
 
-## Data Source 📚
-
-1. [Chipur](https://chipur.com)
-
-
-2. [Blurt](https://blurt.blog)
-
-
-3. [NatashaTracy](https://natashatracy.com)
-
 ## Steps
 
 1. **Knowledge Base Preparation**: The chatbot's knowledge base is populated with mental health-related information from various sources, such as blogs and websites. This data is scraped, cleaned, and processed using techniques like OpenAI's extraction chain.
@@ -66,6 +56,8 @@ The use case for this project is to develop a mental health platform that levera
 7. **Appointment Scheduling**: If the user requests to schedule an appointment, the chatbot prompts the user for available dates and times. Once confirmed, the chatbot creates a calendar event using the Google Calendar API and sends appointment details via email.
 
 8. **Data Storage**: User chat history and relevant information, including scheduled appointments, are stored in a Snowflake database for future reference and analysis.
+
+9. **Evaluation**: The chatbot's responses are evaluated using DeepEval from ConfidentAI, which calculates Hallucination, Bias, Answer Relevancy, and Toxicity scores. This helps assess the quality and safety of the chatbot's outputs.
 
 
 ## Project Tree 
@@ -136,27 +128,6 @@ The use case for this project is to develop a mental health platform that levera
 │     │  └─ storage
 │     │     ├─ 315d980b-5792-4129-8386-b564cc6a8a96
 │     │     │  └─ compute_logs
-│     │     │     ├─ cihempzk.complete
-│     │     │     ├─ cihempzk.err
-│     │     │     ├─ cihempzk.out
-│     │     │     ├─ jekhafeb.complete
-│     │     │     ├─ jekhafeb.err
-│     │     │     ├─ jekhafeb.out
-│     │     │     ├─ kvamskng.complete
-│     │     │     ├─ kvamskng.err
-│     │     │     ├─ kvamskng.out
-│     │     │     ├─ kyymtjgo.complete
-│     │     │     ├─ kyymtjgo.err
-│     │     │     ├─ kyymtjgo.out
-│     │     │     ├─ pjfvwcnu.complete
-│     │     │     ├─ pjfvwcnu.err
-│     │     │     ├─ pjfvwcnu.out
-│     │     │     ├─ rlgwvsiv.complete
-│     │     │     ├─ rlgwvsiv.err
-│     │     │     ├─ rlgwvsiv.out
-│     │     │     ├─ zmyhrqbc.complete
-│     │     │     ├─ zmyhrqbc.err
-│     │     │     └─ zmyhrqbc.out
 │     │     ├─ create_df
 │     │     ├─ create_snowflake_conn
 │     │     ├─ define_schema
@@ -182,24 +153,6 @@ The use case for this project is to develop a mental health platform that levera
 │     │  └─ storage
 │     │     ├─ 71f98b34-2b0c-4a64-b7d9-fec9ceca0704
 │     │     │  └─ compute_logs
-│     │     │     ├─ assyxnzc.complete
-│     │     │     ├─ assyxnzc.err
-│     │     │     ├─ assyxnzc.out
-│     │     │     ├─ gczmihta.complete
-│     │     │     ├─ gczmihta.err
-│     │     │     ├─ gczmihta.out
-│     │     │     ├─ jhensmgr.complete
-│     │     │     ├─ jhensmgr.err
-│     │     │     ├─ jhensmgr.out
-│     │     │     ├─ kqbjwufs.complete
-│     │     │     ├─ kqbjwufs.err
-│     │     │     ├─ kqbjwufs.out
-│     │     │     ├─ wcpiegeh.complete
-│     │     │     ├─ wcpiegeh.err
-│     │     │     ├─ wcpiegeh.out
-│     │     │     ├─ ykarsvdk.complete
-│     │     │     ├─ ykarsvdk.err
-│     │     │     └─ ykarsvdk.out
 │     │     ├─ c_create_df
 │     │     ├─ c_define_schema
 │     │     ├─ c_extracted_url_list
@@ -212,17 +165,8 @@ The use case for this project is to develop a mental health platform that levera
 │     │  │  └─ runs
 │     │  │     └─ index.db
 │     │  ├─ schedules
-│     │  │  └─ schedules.db
-│     │  └─ storage
-│     │     ├─ bf300faf-df0d-4ced-81f9-1645d0412023
-│     │     │  └─ compute_logs
-│     │     │     ├─ gzvjsxcm.err
-│     │     │     ├─ gzvjsxcm.out
-│     │     │     ├─ wazbeazq.complete
-│     │     │     ├─ wazbeazq.err
-│     │     │     └─ wazbeazq.out
-│     │     ├─ extracted_url_list
-│     │     └─ threaded_url_list_pull
+│     │     └─ schedules.db
+│     │ 
 │     ├─ tmp__x0mslm
 │     │  ├─ history
 │     │  │  ├─ runs.db
@@ -240,21 +184,6 @@ The use case for this project is to develop a mental health platform that levera
 │     │     │     ├─ mfzpihln.err
 │     │     │     └─ mfzpihln.out
 │     │     └─ define_schema
-│     ├─ tmpmd6354j2
-│     │  └─ storage
-│     │     ├─ 2e7f04c5-7f65-4329-acfb-83eee38a61b7
-│     │     │  └─ compute_logs
-│     │     │     ├─ nuiizpkn.err
-│     │     │     ├─ nuiizpkn.out
-│     │     │     ├─ saxmmcih.complete
-│     │     │     ├─ saxmmcih.err
-│     │     │     ├─ saxmmcih.out
-│     │     │     ├─ zhkrfldr.complete
-│     │     │     ├─ zhkrfldr.err
-│     │     │     └─ zhkrfldr.out
-│     │     ├─ n_define_schema
-│     │     ├─ n_extracted_url_list
-│     │     └─ n_threaded_url_list_pull
 │     └─ tmppterspc2
 │        ├─ history
 │        │  ├─ runs.db
@@ -267,44 +196,8 @@ The use case for this project is to develop a mental health platform that levera
 │        └─ storage
 │           ├─ 2cbedd3a-ed51-455b-b972-da90485c60ca
 │           │  └─ compute_logs
-│           │     ├─ awzgvxcy.complete
-│           │     ├─ awzgvxcy.err
-│           │     ├─ awzgvxcy.out
-│           │     ├─ dbubvzjg.complete
-│           │     ├─ dbubvzjg.err
-│           │     ├─ dbubvzjg.out
-│           │     ├─ hnsovkzn.complete
-│           │     ├─ hnsovkzn.err
-│           │     ├─ hnsovkzn.out
-│           │     ├─ trcivbsr.complete
-│           │     ├─ trcivbsr.err
-│           │     ├─ trcivbsr.out
-│           │     ├─ vujbxtqf.complete
-│           │     ├─ vujbxtqf.err
-│           │     ├─ vujbxtqf.out
-│           │     ├─ wqirqdsv.complete
-│           │     ├─ wqirqdsv.err
-│           │     └─ wqirqdsv.out
 │           ├─ b29d93e0-f0b2-4aec-a62c-bc55dafe1fc5
 │           │  └─ compute_logs
-│           │     ├─ gvkvsosw.complete
-│           │     ├─ gvkvsosw.err
-│           │     ├─ gvkvsosw.out
-│           │     ├─ kwaateim.complete
-│           │     ├─ kwaateim.err
-│           │     ├─ kwaateim.out
-│           │     ├─ nqiukgrx.complete
-│           │     ├─ nqiukgrx.err
-│           │     ├─ nqiukgrx.out
-│           │     ├─ ooxaypou.complete
-│           │     ├─ ooxaypou.err
-│           │     ├─ ooxaypou.out
-│           │     ├─ ubqspgqc.complete
-│           │     ├─ ubqspgqc.err
-│           │     ├─ ubqspgqc.out
-│           │     ├─ wcvgjmha.complete
-│           │     ├─ wcvgjmha.err
-│           │     └─ wcvgjmha.out
 │           ├─ c_create_df
 │           ├─ c_define_schema
 │           ├─ c_extracted_url_list
