@@ -1,4 +1,4 @@
-# AI4MentalHealth Flow :zap: 
+# AI4MentalHealth :zap: 
 
 ## Live application Links :octopus:
 
