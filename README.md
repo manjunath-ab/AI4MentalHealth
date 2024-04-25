@@ -171,21 +171,9 @@ The use case for this project is to develop a mental health platform that levera
 │     │     └─ schedules.db
 │     │ 
 │     ├─ tmp__x0mslm
-│     │  ├─ history
-│     │  │  ├─ runs.db
-│     │  │  └─ runs
-│     │  │     └─ index.db
-│     │  └─ schedules
-│     │     └─ schedules.db
 │     ├─ tmpeqygq9vi
 │     │  └─ storage
 │     │     ├─ 06284fc5-5422-4d91-95d4-200c91fa16b5
-│     │     │  └─ compute_logs
-│     │     │     ├─ indvtkge.err
-│     │     │     ├─ indvtkge.out
-│     │     │     ├─ mfzpihln.complete
-│     │     │     ├─ mfzpihln.err
-│     │     │     └─ mfzpihln.out
 │     │     └─ define_schema
 │     └─ tmppterspc2
 │        ├─ history
@@ -215,11 +203,6 @@ The use case for this project is to develop a mental health platform that levera
 │           └─ n_threaded_url_list_pull
 ├─ new_knowledge_db
 │  ├─ 89207a28-d694-4681-b72d-a6a21b882f04
-│  │  ├─ data_level0.bin
-│  │  ├─ header.bin
-│  │  ├─ index_metadata.pickle
-│  │  ├─ length.bin
-│  │  └─ link_lists.bin
 │  └─ chroma.sqlite3
 ├─ pipelines
 │  ├─ .DS_Store
