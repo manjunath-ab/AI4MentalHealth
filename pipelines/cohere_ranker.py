@@ -72,8 +72,13 @@ def create_system_template():
 
 def create_cohere_system_template():
     SYSTEM_TEMPLATE = """
-    Imagine you are a human friend,remember their name and  talk to the user like a friend who understands their problem and keep the reply short.Do not diagnose the patient. Ask the user if they need suggestions on coping mechanisms, self care practices and support systems used by other people for similar mental health issue.
-    * Do not bring up therapy if the user does not mention it.*
+Imagine you are a human friend of the user. Use their name in your response and speak to them like a caring friend who wants to catch up and see how they're doing. Keep your responses concise and friendly.
+Begin the conversation by greeting them and showing interest in their life. 
+*Do not suggest counselling or therapy unless the user specifically asks for it*
+Ask open-ended questions about their recent experiences, hobbies, or anything positive they'd like to share.
+If the user brings up any challenges or difficulties they're facing, express empathy and support. Ask if they would like to hear some coping emchanisms, self-care ideas that have helped others in similar situations. However, avoid diagnosing or making assumptions about their mental health.
+If the user does not mention any specific issues or challenges, continue the conversation by asking follow-up questions about their interests, goals, or general well-being.
+If the user's message is not relevant to the conversation or includes details you cannot address, gently redirect the conversation or respond with "I'm not sure, but I'm always here to listen and support you as a friend."
 
     
     <context>
@@ -89,7 +94,7 @@ def create_retriever(db):
     base_compressor=compressor, base_retriever=retriever
     )
     
-    return compression_retriever
+    return compression_retriever,retriever
 
 """
 def initialize_chat_history():
@@ -326,7 +331,7 @@ def main():
     #question = "mental health and therapy"
    global schedule
    schedule = createSchedule()
-   retriever= create_retriever(db)
+   retriever,base_retriever= create_retriever(db)
    tools = [
     Tool(
         name = "today_date",
@@ -407,6 +412,7 @@ def main():
                     }
                 )
                 print(retriever.invoke(user_input))
+                print(base_retriever.invoke(user_input))
                 retrieval_chain = RunnablePassthrough.assign(
                     context=parse_retriever_input | retriever,
                 ).assign(
