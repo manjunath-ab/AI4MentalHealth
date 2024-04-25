@@ -9,12 +9,12 @@ from deepeval.metrics import ToxicityMetric
 import os
 
 def load_environment_variables():
-    dotenv_path = Path('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/.env')
+    dotenv_path = Path('/Users/abhis/.env')
     load_dotenv(dotenv_path=dotenv_path)
 
 load_environment_variables()
-for filename in os.listdir('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/pipelines/chat_evaluation'):
-    file_path = os.path.join('/Users/sivaranjanis/Desktop/genai/AI4MentalHealth/pipelines/chat_evaluation', filename)
+for filename in os.listdir('C:/Users/abhis/Desktop/AI4MentalHealth/pipelines/chat_evaluation'):
+    file_path = os.path.join('C:/Users/abhis/Desktop/AI4MentalHealth/pipelines/chat_evaluation', filename)
     if os.path.isfile(file_path):
         # Process each file
         with open(file_path, 'r') as file:
