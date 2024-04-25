@@ -4,7 +4,7 @@
 
 Please use this application responsibly, as we have limited free credits remaining.
 
-[![Codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=1blarGD_LQ5o5aGcJWiKKbhDBissQSL9qfs28dx5HyFk#11)
+[![Presentation Link](https://img.shields.io/badge/Presentation_Link-808080?style=for-the-badge&logo=Google&logoColor=white)](https://docs.google.com/presentation/d/1MOpAVT97rVr3FBrZUoh3YzQ-wVk_Bs2A-gLwHbBo8go/edit?usp=sharing)
 
 [![Demo Link](https://img.shields.io/badge/Demo_Link-808080?style=for-the-badge&logo=Loom&logoColor=white)](https://www.loom.com/share/dc6108d1c309493d9af014286ca3420a?sid=607bc134-3821-4eb7-b910-644675122170)
 
