@@ -6,7 +6,7 @@ Please use this application responsibly, as we have limited free credits remaini
 
 [![Codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=1blarGD_LQ5o5aGcJWiKKbhDBissQSL9qfs28dx5HyFk#11)
 
-[![Demo Link](https://img.shields.io/badge/Demo_Link-808080?style=for-the-badge&logo=YouTube&logoColor=white)](https://youtu.be/DnmAYNL0kcI)
+[![Demo Link](https://img.shields.io/badge/Demo_Link-808080?style=for-the-badge&logo=Loom&logoColor=white)](https://www.loom.com/share/dc6108d1c309493d9af014286ca3420a?sid=607bc134-3821-4eb7-b910-644675122170)
 
 ## Meet Bruno
 
@@ -20,21 +20,9 @@ Bruno is our friendly chatbot, designed to provide a supportive and non-judgment
 
 The above diagram illustrates the architecture of the Mental Health Chatbot, showcasing the various components and technologies used in the project.
 
-
-## Project Flow 🎯
-
-1. Scrape mental health related data from various blog sites using Selenium with Dagster Orchestration tool. 🕷️
-2. Clean and categorize the scraped data using OpenAIExtractionChain, then store it into a Snowflake database along with associated metadata. 🧹
-3. Use dbt to run transformations on the scraped data. 🔧
-4. Embed the transformed data using OpenAI embeddings and store it into ChromaDB for efficient similarity search. 🔍
-
-5.
-
 ## Use Case 📖
 
 The use case for this project is to develop a mental health platform that leverages conversation AI based on Retrieval-augmented generation (RAG) to offer users a supportive and non-judgmental space, fostering emotional well-being and personal introspection. 🧠
-
-
 
 ## Technologies Used 🛠️
 
