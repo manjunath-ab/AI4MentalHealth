@@ -2,8 +2,6 @@
 
 ## Live Application Links 🌐
 
-Please use this application responsibly, as we have limited free credits remaining.
-
 [![Presentation Link](https://img.shields.io/badge/Presentation_Link-808080?style=for-the-badge&logo=Google&logoColor=white)](https://docs.google.com/presentation/d/1MOpAVT97rVr3FBrZUoh3YzQ-wVk_Bs2A-gLwHbBo8go/edit?usp=sharing)
 
 [![Demo Link](https://img.shields.io/badge/Demo_Link-808080?style=for-the-badge&logo=Loom&logoColor=white)](https://www.loom.com/share/dc6108d1c309493d9af014286ca3420a?sid=607bc134-3821-4eb7-b910-644675122170)
@@ -101,13 +99,6 @@ The use case for this project is to develop a mental health platform that levera
 ├─ chat_eval.json
 ├─ dagster_configuration
 │  └─ dagster_ai4mentalhealth
-│     ├─ README.md
-│     ├─ dagster_ai4mentalhealth.egg-info
-│     │  ├─ PKG-INFO
-│     │  ├─ SOURCES.txt
-│     │  ├─ dependency_links.txt
-│     │  ├─ requires.txt
-│     │  └─ top_level.txt
 │     ├─ dagster_ai4mentalhealth
 │     │  ├─ __init__.py
 │     │  ├─ blurt.py
@@ -138,19 +129,7 @@ The use case for this project is to develop a mental health platform that levera
 │     │     ├─ html_scrape
 │     │     ├─ publish_to_snowflake
 │     │     └─ threaded_url_list_pull
-│     ├─ tmp4oprin6e
-│     │  ├─ history
-│     │  │  ├─ runs.db
-│     │  │  └─ runs
-│     │  │     └─ index.db
-│     │  └─ schedules
-│     │     └─ schedules.db
 │     ├─ tmp5zgffo06
-│     │  ├─ history
-│     │  │  ├─ runs.db
-│     │  │  └─ runs
-│     │  │     ├─ 71f98b34-2b0c-4a64-b7d9-fec9ceca0704.db
-│     │  │     └─ index.db
 │     │  ├─ schedules
 │     │  │  └─ schedules.db
 │     │  └─ storage
@@ -162,26 +141,7 @@ The use case for this project is to develop a mental health platform that levera
 │     │     ├─ c_html_scrape
 │     │     ├─ c_publish_to_snowflake
 │     │     └─ c_threaded_url_list_pull
-│     ├─ tmp_5_c6a03
-│     │  ├─ history
-│     │  │  ├─ runs.db
-│     │  │  └─ runs
-│     │  │     └─ index.db
-│     │  ├─ schedules
-│     │     └─ schedules.db
-│     │ 
-│     ├─ tmp__x0mslm
-│     ├─ tmpeqygq9vi
-│     │  └─ storage
-│     │     ├─ 06284fc5-5422-4d91-95d4-200c91fa16b5
-│     │     └─ define_schema
 │     └─ tmppterspc2
-│        ├─ history
-│        │  ├─ runs.db
-│        │  └─ runs
-│        │     ├─ 2cbedd3a-ed51-455b-b972-da90485c60ca.db
-│        │     ├─ b29d93e0-f0b2-4aec-a62c-bc55dafe1fc5.db
-│        │     └─ index.db
 │        ├─ schedules
 │        │  └─ schedules.db
 │        └─ storage
@@ -205,7 +165,6 @@ The use case for this project is to develop a mental health platform that levera
 │  ├─ 89207a28-d694-4681-b72d-a6a21b882f04
 │  └─ chroma.sqlite3
 ├─ pipelines
-│  ├─ .DS_Store
 │  ├─ CREDENTIALS
 │  │  ├─ credentials.json
 │  │  └─ token.json
