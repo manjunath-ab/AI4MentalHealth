@@ -22,7 +22,7 @@ columns_to_select = [
 
 # Construct the SQL query
 columns_string = ', '.join(columns_to_select)
-query = f"SELECT {columns_string} FROM CHATBOT_KNOWLEDGE LIMIT 5"
+query = f"SELECT {columns_string} FROM CHATBOT_KNOWLEDGE LIMIT 1"
 
 conn = create_snowflake_conn() 
 
@@ -61,8 +61,7 @@ index_name = "chatbot-knowledgebase"
 index = pc.Index(index_name)
 
 # Select the first 100 items from the list
-items_to_insert = items[:5]
-
+items_to_insert = items[:2]
 
 # Upsert items into the Pinecone index
 index.upsert(vectors=items_to_insert)
