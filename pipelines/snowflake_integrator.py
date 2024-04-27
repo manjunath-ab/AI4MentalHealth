@@ -19,12 +19,12 @@ snowflake_role = os.getenv('SNOWFLAKE_ROLE')
 
 def create_snowflake_conn():
  conn = snowflake.connector.connect(
-    user='ABHI1006',
-    password='abhiICE9686@S',
-    account='ceb13564.us-east-1',
-    warehouse='COMPUTE_WH',
-    database='AI4MENTALHEALTH',
-    schema='STAGING'
+    user='',
+    password='',
+    account='',
+    warehouse='',
+    database='',
+    schema=''
 )
  return conn
 
