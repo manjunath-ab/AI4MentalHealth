@@ -11,7 +11,7 @@ from langchain.prompts.chat import (
 )
 
 load_dotenv()
-OPENAI_API_KEY = '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'
+OPENAI_API_KEY = ''
 
 fake = Faker()
 
